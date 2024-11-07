@@ -3,6 +3,7 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const sequelize = require("./config/dbConfig");
+const userRoute = require("./routes/userRoute");
 
 const app = express();
 const port = process.env.PORT;
@@ -23,6 +24,8 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+app.use("/api/v1/users", userRoute);
 
 sequelize
   .authenticate()
