@@ -21,4 +21,30 @@ const createNewUser = async (req, res) => {
   }
 };
 
-module.exports = { createNewUser };
+const testUploadFile = (req, res) => {
+  try {
+    const { file } = req;
+    if (!file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    res.status(200).json({ message: "File uploaded successfully", data: file });
+  } catch (error) {
+    res.status(400).json({ error: "error" });
+  }
+};
+
+const test2 = (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: "No files uploaded" });
+    }
+    res.status(200).json({
+      message: "Files uploaded successfully",
+      files: req.files,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: "Error" });
+  }
+};
+module.exports = { createNewUser, testUploadFile, test2 };
