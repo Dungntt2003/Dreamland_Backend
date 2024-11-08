@@ -1,8 +1,11 @@
 const { createUser, checkUserExist } = require("../queries/userQuery");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const createNewUser = async (req, res) => {
   try {
+    console.log("check file ", req.files);
+    console.log("check body ", req.body);
     const userData = {
       ...req.body,
       business_info_front:
@@ -21,7 +24,7 @@ const createNewUser = async (req, res) => {
       return res.status(400).json({ error: newUser.message });
     }
     res.status(200).json({
-      message: "User created successfully",
+      message: "Đăng ký thành công",
       data: {
         name: newUser.name,
         email: newUser.email,
@@ -61,21 +64,14 @@ const checkLogin = async (req, res) => {
       return res.status(400).json({
         error: "Mật khẩu không đúng",
       });
+
+    const token = jwt.sign({ id: userExist.id }, process.env.JWT_SECRET, {
+      expiresIn: "24h",
+    });
+
     return res.status(200).json({
       message: "Đăng nhập thành công",
-      data: {
-        id: userExist.id,
-        name: userExist.name,
-        email: userExist.email,
-        front_image: userExist.front_image
-          ? `uploads/${userExist.front_image}`
-          : null,
-        back_image: userExist.back_image
-          ? `uploads/${userExist.back_image}`
-          : null,
-        ava: userExist.ava ? `uploads/${userExist.ava}` : null,
-        role: userExist.role,
-      },
+      token: token,
     });
   } catch (error) {
     res.status(400).json({
