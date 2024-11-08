@@ -1,15 +1,31 @@
-const { createUser } = require("../queries/userQuery");
+const { createUser, checkUserExist } = require("../queries/userQuery");
 
 const createNewUser = async (req, res) => {
   try {
     const userData = req.body;
+    const business_info_front = req.files.front_image
+      ? req.files.front_image[0].filename
+      : null;
+    const business_info_end = req.files.back_image
+      ? req.files.back_image[0].filename
+      : null;
+    const ava = req.files.ava ? req.files.ava[0].filename : null;
     const newUser = await createUser(userData);
     if (newUser.message) {
       return res.status(400).json({ error: newUser.message });
     }
     res.status(200).json({
       message: "User created successfully",
-      data: newUser,
+      data: {
+        name: newUser.name,
+        email: newUser.email,
+        front_image: business_info_front
+          ? `uploads/${business_info_front}`
+          : null,
+        back_image: business_info_end ? `uploads/${business_info_end}` : null,
+        ava: ava ? `uploads/${ava}` : null,
+        role: newUser.role,
+      },
     });
   } catch (error) {
     res.status(400).json({
@@ -21,30 +37,36 @@ const createNewUser = async (req, res) => {
   }
 };
 
-const testUploadFile = (req, res) => {
+const checkLogin = async (req, res) => {
   try {
-    const { file } = req;
-    if (!file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-    res.status(200).json({ message: "File uploaded successfully", data: file });
+    const userData = req.body;
+    const userExist = await checkUserExist(userData);
+    if (!userExist) {
+      return res.status(400).json({ error: "Tài khoản không tồn tại" });
+    } else
+      return res.status(200).json({
+        message: "Đăng nhập thành công",
+        data: {
+          id: userExist.id,
+          name: userExist.name,
+          email: userExist.email,
+          front_image: userExist.front_image
+            ? `uploads/${userExist.front_image}`
+            : null,
+          back_image: userExist.back_image
+            ? `uploads/${userExist.back_image}`
+            : null,
+          ava: userExist.ava ? `uploads/${userExist.ava}` : null,
+          role: userExist.role,
+        },
+      });
   } catch (error) {
-    res.status(400).json({ error: "error" });
-  }
-};
-
-const test2 = (req, res) => {
-  try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: "No files uploaded" });
-    }
-    res.status(200).json({
-      message: "Files uploaded successfully",
-      files: req.files,
+    res.status(400).json({
+      error:
+        error.errors && error.errors.length > 0
+          ? error.errors[0].message
+          : "Đã xảy ra lỗi",
     });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ error: "Error" });
   }
 };
-module.exports = { createNewUser, testUploadFile, test2 };
+module.exports = { createNewUser, checkLogin };

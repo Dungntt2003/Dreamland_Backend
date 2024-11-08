@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const db = require("../models/index");
 const createUser = async (userData) => {
   try {
@@ -17,4 +18,11 @@ const createUser = async (userData) => {
   }
 };
 
-module.exports = { createUser };
+const checkUserExist = async (userData) => {
+  const existedUser = await db.User.findOne({
+    where: { email: userData.email },
+  });
+  return existedUser;
+};
+
+module.exports = { createUser, checkUserExist };

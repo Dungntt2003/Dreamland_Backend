@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+const bcrypt = require("bcrypt");
 const regularExpression =
   /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
 module.exports = (sequelize, DataTypes) => {
@@ -95,5 +96,10 @@ module.exports = (sequelize, DataTypes) => {
       paranoid: true,
     }
   );
+
+  User.addHook("beforeCreate", async (user) => {
+    const saltRounds = 10;
+    user.password = await bcrypt.hash(user.password, saltRounds);
+  });
   return User;
 };
