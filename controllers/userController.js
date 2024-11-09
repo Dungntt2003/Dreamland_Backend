@@ -65,9 +65,13 @@ const checkLogin = async (req, res) => {
         error: "Mật khẩu không đúng",
       });
 
-    const token = jwt.sign({ id: userExist.id }, process.env.JWT_SECRET, {
-      expiresIn: "24h",
-    });
+    const token = jwt.sign(
+      { id: userExist.id, role: userExist.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "24h",
+      }
+    );
 
     return res.status(200).json({
       message: "Đăng nhập thành công",
