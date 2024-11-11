@@ -1,28 +1,22 @@
 const { where } = require("sequelize");
 const db = require("../models/index");
-const createUser = async (userData) => {
-  try {
-    const existingUser = await db.User.findOne({
-      where: { email: userData.email },
-    });
-    if (existingUser) {
-      return {
-        message: "Email đã tồn tại",
-      };
-    }
 
-    const user = await db.User.create(userData);
-    return user;
-  } catch (error) {
-    throw error;
-  }
-};
-
-const checkUserExist = async (userData) => {
-  const existedUser = await db.User.findOne({
-    where: { email: userData.email },
+const getUser = async (id) => {
+  const user = await db.User.findByPk(id, {
+    attributes: {
+      exclude: ["password"],
+    },
   });
-  return existedUser;
+  return user;
 };
 
-module.exports = { createUser, checkUserExist };
+const updateUser = async (id, userData) => {
+  // console.log(userData);
+  const [count] = await db.User.update(userData, {
+    where: { id: id },
+  });
+  // console.log(count);
+  return count;
+};
+
+module.exports = { updateUser, getUser };
