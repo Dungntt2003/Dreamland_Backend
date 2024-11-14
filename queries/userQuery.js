@@ -10,6 +10,16 @@ const getUser = async (id) => {
   return user;
 };
 
+const updateAva = async (id, ava) => {
+  const [count] = await db.User.update(
+    { ava: ava },
+    {
+      where: { id: id },
+    }
+  );
+  return count;
+};
+
 const updateUser = async (id, userData) => {
   // console.log(userData);
   const [count] = await db.User.update(userData, {
@@ -19,4 +29,14 @@ const updateUser = async (id, userData) => {
   return count;
 };
 
-module.exports = { updateUser, getUser };
+const updatePass = async (id, newPass) => {
+  const [count] = await db.User.update(
+    { password: newPass },
+    {
+      where: { id: id },
+    }
+  );
+  return count;
+};
+
+module.exports = { updateUser, getUser, updateAva, updatePass };

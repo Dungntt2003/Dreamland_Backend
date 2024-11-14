@@ -4,8 +4,6 @@ const jwt = require("jsonwebtoken");
 
 const createNewUser = async (req, res) => {
   try {
-    console.log("check file ", req.files);
-    console.log("check body ", req.body);
     const userData = {
       ...req.body,
       business_info_front:

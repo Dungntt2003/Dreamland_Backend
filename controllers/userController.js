@@ -1,4 +1,9 @@
-const { updateUser, getUser } = require("../queries/userQuery");
+const {
+  updateUser,
+  getUser,
+  updateAva,
+  updatePass,
+} = require("../queries/userQuery");
 
 const getUserInfo = async (req, res) => {
   const id = req.params.id;
@@ -46,4 +51,52 @@ const updateUserInfo = async (req, res) => {
   }
 };
 
-module.exports = { updateUserInfo, getUserInfo };
+const updateAvatar = async (req, res) => {
+  try {
+    const avatar = req.file.filename;
+    const id = req.params.id;
+    const count = await updateAva(id, avatar);
+    if (count > 0) {
+      return res.status(200).json({
+        message: "Avatar updated successfully",
+      });
+    } else
+      return res.status(400).json({
+        message: "Users not found or no changes made",
+      });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({
+      error:
+        error.errors && error.errors.length > 0
+          ? error.errors[0].message
+          : "Error",
+    });
+  }
+};
+
+const updatePassword = async (req, res) => {
+  try {
+    const password = req.body.password;
+    const id = req.params.id;
+    const count = await updatePass(id, password);
+    if (count > 0) {
+      return res.status(200).json({
+        message: "Password updated successfully",
+      });
+    } else
+      return res.status(400).json({
+        message: "Users not found or no changes made",
+      });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({
+      error:
+        error.errors && error.errors.length > 0
+          ? error.errors[0].message
+          : "Error",
+    });
+  }
+};
+
+module.exports = { updateUserInfo, getUserInfo, updateAvatar, updatePassword };

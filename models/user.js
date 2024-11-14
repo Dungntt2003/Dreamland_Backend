@@ -101,5 +101,11 @@ module.exports = (sequelize, DataTypes) => {
     const saltRounds = 10;
     user.password = await bcrypt.hash(user.password, saltRounds);
   });
+  User.addHook("beforeUpdate", async (user) => {
+    if (user.changed("password")) {
+      const saltRounds = 10;
+      user.password = await bcrypt.hash(user.password, saltRounds);
+    }
+  });
   return User;
 };
