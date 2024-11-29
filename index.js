@@ -6,6 +6,7 @@ const path = require("path");
 const sequelize = require("./config/dbConfig");
 const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
+const sightRoute = require("./routes/sightRoute");
 
 const app = express();
 const port = process.env.PORT;
@@ -28,6 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/api/v1/sights", sightRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1", authRoute);
 
