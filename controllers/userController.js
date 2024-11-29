@@ -53,16 +53,21 @@ const updateUserInfo = async (req, res) => {
 
 const updateAvatar = async (req, res) => {
   try {
-    const avatar = req.file.filename;
-    const id = req.params.id;
-    const count = await updateAva(id, avatar);
-    if (count > 0) {
-      return res.status(200).json({
-        message: "Avatar updated successfully",
-      });
+    if (req.file) {
+      const avatar = req.file.filename;
+      const id = req.params.id;
+      const count = await updateAva(id, avatar);
+      if (count > 0) {
+        return res.status(200).json({
+          message: "Avatar updated successfully",
+        });
+      } else
+        return res.status(400).json({
+          message: "Users not found or no changes made",
+        });
     } else
-      return res.status(400).json({
-        message: "Users not found or no changes made",
+      return res.status(404).json({
+        message: "No file uploaded",
       });
   } catch (error) {
     console.log(error);
