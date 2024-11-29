@@ -9,7 +9,7 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.addColumn("user", "deletedAt", {
+    await queryInterface.addColumn("User", "deletedAt", {
       type: Sequelize.DATE,
       allowNull: true,
     });
@@ -22,6 +22,6 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.removeColumn("user", "deletedAt");
+    await queryInterface.removeColumn("User", "deletedAt");
   },
 };
