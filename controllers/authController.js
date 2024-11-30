@@ -66,7 +66,7 @@ const checkLogin = async (req, res) => {
       { id: userExist.id, role: userExist.role },
       process.env.JWT_SECRET,
       {
-        expiresIn: "24h",
+        expiresIn: "30d",
       }
     );
 

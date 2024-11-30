@@ -10,6 +10,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Sight.hasMany(models.DemoRepoDetail, {
+        foreignKey: "service_id",
+        as: "demoRepoDetail",
+        constraints: false,
+        scope: { service_type: "sight" },
+      });
     }
   }
   Sight.init(
