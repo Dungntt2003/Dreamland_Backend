@@ -6,9 +6,10 @@ const {
   getListSights,
   getSightDetail,
 } = require("../controllers/sightController");
+const authenticateToken = require("../middlewares/authMiddleware");
 
-route.get("/", getListSights);
-route.get("/:id", getSightDetail);
-route.post("/", upload.array("images", 5), createSight);
+route.get("/", authenticateToken, getListSights);
+route.get("/:id", authenticateToken, getSightDetail);
+route.post("/", authenticateToken, upload.array("images", 5), createSight);
 
 module.exports = route;
