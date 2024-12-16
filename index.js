@@ -9,6 +9,7 @@ const userRoute = require("./routes/userRoute");
 const sightRoute = require("./routes/sightRoute");
 const repositoryRoute = require("./routes/repositoryRoute");
 const demoRepoDetailRoute = require("./routes/demoRepoRoute");
+const entertainmentRoute = require("./routes/entertainmentRoute");
 
 const app = express();
 const port = process.env.PORT;
@@ -34,6 +35,7 @@ app.use((req, res, next) => {
 app.use("/api/v1/repositories", repositoryRoute);
 app.use("/api/v1/demoRepo", demoRepoDetailRoute);
 app.use("/api/v1/sights", sightRoute);
+app.use("/api/v1/entertainments", entertainmentRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1", authRoute);
 
