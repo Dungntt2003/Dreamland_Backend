@@ -13,6 +13,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "restaurant_id",
         as: "menu",
       });
+      Restaurant.hasMany(models.DemoRepoDetail, {
+        foreignKey: "service_id",
+        as: "demoRepoDetail",
+        constraints: false,
+        scope: { service_type: "restaurant" },
+      });
     }
   }
   Restaurant.init(

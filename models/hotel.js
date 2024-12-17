@@ -10,6 +10,12 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Hotel.hasMany(models.Room, { foreignKey: "hotel_id", as: "room" });
+      Hotel.hasMany(models.DemoRepoDetail, {
+        foreignKey: "service_id",
+        as: "demoRepoDetail",
+        constraints: false,
+        scope: { service_type: "hotel" },
+      });
     }
   }
   Hotel.init(

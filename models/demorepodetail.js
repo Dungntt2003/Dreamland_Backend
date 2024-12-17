@@ -22,6 +22,27 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         hooks: true,
       });
+      DemoRepoDetail.belongsTo(models.Entertainment, {
+        foreignKey: "service_id",
+        as: "entertainment",
+        constraints: false,
+        onDelete: "CASCADE",
+        hooks: true,
+      });
+      DemoRepoDetail.belongsTo(models.Hotel, {
+        foreignKey: "service_id",
+        as: "hotel",
+        constraints: false,
+        onDelete: "CASCADE",
+        hooks: true,
+      });
+      DemoRepoDetail.belongsTo(models.Restaurant, {
+        foreignKey: "service_id",
+        as: "restaurant",
+        constraints: false,
+        onDelete: "CASCADE",
+        hooks: true,
+      });
     }
   }
   DemoRepoDetail.init(
