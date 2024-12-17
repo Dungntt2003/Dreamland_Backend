@@ -11,6 +11,7 @@ const repositoryRoute = require("./routes/repositoryRoute");
 const demoRepoDetailRoute = require("./routes/demoRepoRoute");
 const entertainmentRoute = require("./routes/entertainmentRoute");
 const restaurantRoute = require("./routes/restaurantRoute");
+const hotelRoute = require("./routes/hotelRoute");
 
 const app = express();
 const port = process.env.PORT;
@@ -38,6 +39,7 @@ app.use("/api/v1/demoRepo", demoRepoDetailRoute);
 app.use("/api/v1/sights", sightRoute);
 app.use("/api/v1/entertainments", entertainmentRoute);
 app.use("/api/v1/restaurants", restaurantRoute);
+app.use("/api/v1/hotels", hotelRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1", authRoute);
 
