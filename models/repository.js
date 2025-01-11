@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "repository_id",
         as: "demorepodetail",
       });
+      Repository.hasMany(models.Schedule, {
+        foreignKey: "repository_id",
+        as: "schedule",
+      });
     }
   }
   Repository.init(

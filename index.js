@@ -12,6 +12,7 @@ const demoRepoDetailRoute = require("./routes/demoRepoRoute");
 const entertainmentRoute = require("./routes/entertainmentRoute");
 const restaurantRoute = require("./routes/restaurantRoute");
 const hotelRoute = require("./routes/hotelRoute");
+const scheduleRoute = require("./routes/scheduleRoute");
 
 const app = express();
 const port = process.env.PORT;
@@ -36,6 +37,7 @@ app.use((req, res, next) => {
 
 app.use("/api/v1/repositories", repositoryRoute);
 app.use("/api/v1/demoRepo", demoRepoDetailRoute);
+app.use("/api/v1/schedules", scheduleRoute);
 app.use("/api/v1/sights", sightRoute);
 app.use("/api/v1/entertainments", entertainmentRoute);
 app.use("/api/v1/restaurants", restaurantRoute);

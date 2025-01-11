@@ -1,11 +1,12 @@
 const db = require("../models/index");
-const addNewServiceToRepo = async (serviceData) => {
-  const demoService = await db.DemoRepoDetail.create(serviceData);
-  return demoService;
+
+const addItem = async (itemData) => {
+  const newItem = await db.Schedule.create(itemData);
+  return newItem;
 };
 
-const getServicesInRepo = async (repoId) => {
-  const servicesData = await db.DemoRepoDetail.findAll({
+const getSchedule = async (repoId) => {
+  const scheduleData = await db.Schedule.findAll({
     where: { repository_id: repoId },
     include: [
       {
@@ -32,14 +33,14 @@ const getServicesInRepo = async (repoId) => {
     order: [
       [
         db.sequelize.literal(`
-          FIELD(service_type, 'sight', 'entertainment', 'hotel', 'restaurant')
-        `),
+              FIELD(service_type, 'sight', 'entertainment', 'hotel', 'restaurant')
+            `),
         "ASC",
       ],
     ],
   });
 
-  return servicesData;
+  return scheduleData;
 };
 
-module.exports = { addNewServiceToRepo, getServicesInRepo };
+module.exports = { addItem, getSchedule };

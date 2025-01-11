@@ -15,6 +15,12 @@ module.exports = (sequelize, DataTypes) => {
         constraints: false,
         scope: { service_type: "entertainment" },
       });
+      Entertainment.hasMany(models.Schedule, {
+        foreignKey: "service_id",
+        as: "schedule",
+        constraints: false,
+        scope: { service_type: "entertainment" },
+      });
     }
   }
   Entertainment.init(
