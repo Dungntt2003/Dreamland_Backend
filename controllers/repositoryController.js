@@ -1,4 +1,8 @@
-const { createRepo, getDemoDetail } = require("../queries/repositoryQuery");
+const {
+  createRepo,
+  getDemoDetail,
+  updateDescription,
+} = require("../queries/repositoryQuery");
 
 const createNew = async (req, res) => {
   try {
@@ -26,4 +30,17 @@ const getFullDemo = async (req, res) => {
   }
 };
 
-module.exports = { createNew, getFullDemo };
+const updateRepoWithDes = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const repoData = req.body;
+    const updatedRepo = await updateDescription(id, repoData);
+    res.status(200).json({
+      message: "Repository description updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { createNew, getFullDemo, updateRepoWithDes };

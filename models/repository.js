@@ -44,12 +44,27 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         unique: true,
       },
-      description: DataTypes.TEXT,
+      description: {
+        type: DataTypes.TEXT,
+      },
       numberPeople: {
         type: DataTypes.INTEGER,
         validate: {
           min: 1,
         },
+      },
+      plan: {
+        type: DataTypes.TEXT,
+        get() {
+          const value = this.getDataValue("plan");
+          return value ? JSON.parse(value) : null;
+        },
+        set(value) {
+          this.setDataValue("plan", JSON.stringify(value));
+        },
+      },
+      destination: {
+        type: DataTypes.STRING,
       },
       startDate: DataTypes.DATE,
       endDate: DataTypes.DATE,

@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const db = require("../models/index");
 
 const createRepo = async (repoData) => {
@@ -18,4 +19,11 @@ const getDemoDetail = async (id) => {
   return repository;
 };
 
-module.exports = { createRepo, getDemoDetail };
+const updateDescription = async (id, repoData) => {
+  const updatedRepo = await db.Repository.update(repoData, {
+    where: { id: id },
+  });
+  return updatedRepo;
+};
+
+module.exports = { createRepo, getDemoDetail, updateDescription };
