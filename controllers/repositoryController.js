@@ -2,7 +2,20 @@ const {
   createRepo,
   getDemoDetail,
   updateDescription,
+  getRepoList,
 } = require("../queries/repositoryQuery");
+
+const getAll = async (req, res) => {
+  try {
+    const repoList = await getRepoList();
+    res.status(200).json({
+      message: "Repository list retrieved successfully",
+      data: repoList,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 const createNew = async (req, res) => {
   try {
@@ -43,4 +56,4 @@ const updateRepoWithDes = async (req, res) => {
   }
 };
 
-module.exports = { createNew, getFullDemo, updateRepoWithDes };
+module.exports = { createNew, getFullDemo, updateRepoWithDes, getAll };

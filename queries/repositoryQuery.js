@@ -1,6 +1,11 @@
 const { where } = require("sequelize");
 const db = require("../models/index");
 
+const getRepoList = async () => {
+  const repoList = await db.Repository.findAll();
+  return repoList;
+};
+
 const createRepo = async (repoData) => {
   const repo = await db.Repository.create(repoData);
   return repo;
@@ -26,4 +31,4 @@ const updateDescription = async (id, repoData) => {
   return updatedRepo;
 };
 
-module.exports = { createRepo, getDemoDetail, updateDescription };
+module.exports = { createRepo, getDemoDetail, updateDescription, getRepoList };
