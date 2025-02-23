@@ -7,7 +7,8 @@ const {
 
 const getAll = async (req, res) => {
   try {
-    const repoList = await getRepoList();
+    const userId = req.params.userId;
+    const repoList = await getRepoList(userId);
     res.status(200).json({
       message: "Repository list retrieved successfully",
       data: repoList,

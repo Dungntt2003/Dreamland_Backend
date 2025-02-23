@@ -1,8 +1,12 @@
 const { where } = require("sequelize");
 const db = require("../models/index");
 
-const getRepoList = async () => {
-  const repoList = await db.Repository.findAll();
+const getRepoList = async (userId) => {
+  const repoList = await db.Repository.findAll({
+    where: {
+      user_id: userId,
+    },
+  });
   return repoList;
 };
 
