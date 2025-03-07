@@ -14,6 +14,12 @@ const restaurantRoute = require("./routes/restaurantRoute");
 const hotelRoute = require("./routes/hotelRoute");
 const scheduleRoute = require("./routes/scheduleRoute");
 const paymentRoute = require("./routes/paymentRoute");
+const {
+  crawlRestaurants,
+  crawlMenu,
+  crawlHotel,
+  crawlRoom,
+} = require("./crawlData/testCrawl");
 
 const app = express();
 const port = process.env.PORT;
@@ -58,4 +64,12 @@ sequelize
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  // crawlRestaurants("https://63stravel.com/vn/restaurant/list");
+  // crawlMenu(
+  //   "https://63stravel.com/vn/restaurant/quang-ninh/nha-hang-talata-ha-long"
+  // );
+  // crawlHotel("https://63stravel.com/vn/hotel/list");
+  crawlRoom(
+    "https://63stravel.com/vn/hotel/ha-noi/khu-nghi-duong-jacaranda-valley-ecofarm"
+  );
 });
