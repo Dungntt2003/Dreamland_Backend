@@ -1,5 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
+const fs = require("fs");
+const getProvinceFromURL = require("../utils/getProvince");
 
 async function crawlData(url) {
   try {
@@ -7,7 +9,7 @@ async function crawlData(url) {
     const $ = cheerio.load(data);
 
     let destinations = [];
-
+    const province = getProvinceFromURL(url);
     $(".item_box_content_travel").each((i, element) => {
       const title = $(element)
         .find(".item_travel_content_title a")
@@ -29,12 +31,20 @@ async function crawlData(url) {
           images.push($(img).attr("src"));
         });
 
-      destinations.push({ title, link, description, mainImage, images });
+      destinations.push({
+        title,
+        link,
+        description,
+        mainImage,
+        images,
+        province,
+      });
     });
 
-    console.log(`Dữ liệu từ ${url}:`, destinations);
+    return destinations;
   } catch (error) {
-    console.error("Lỗi khi crawl dữ liệu:", error.message);
+    console.error("❌ Lỗi khi crawl dữ liệu:", error.message);
+    return [];
   }
 }
 
@@ -52,13 +62,36 @@ async function getTravelLinks(mainUrl) {
       }
     });
 
-    console.log("Danh sách URL địa điểm du lịch:", travelLinks);
+    console.log("📌 Danh sách URL địa điểm du lịch:", travelLinks);
 
-    for (let link of travelLinks) {
-      await crawlData(link);
+    let allDestinations = [];
+
+    // for (let link of travelLinks) {
+    //   const destinations = await crawlData(link);
+    //   console.log(destinations);
+    //   allDestinations.push(...destinations);
+    // }
+    if (travelLinks.length > 0) {
+      const firstLink = travelLinks[1];
+      const destinations = await crawlData(firstLink);
+      // console.log(destinations);
+      allDestinations.push(...destinations);
+    } else {
+      console.log("Không có link nào trong travelLinks.");
     }
+
+    console.log(
+      "✅ Dữ liệu tổng hợp:",
+      JSON.stringify(allDestinations, null, 2)
+    );
+    fs.writeFileSync(
+      "./crawlData/travel_data.json",
+      JSON.stringify(allDestinations, null, 2),
+      "utf-8"
+    );
+    console.log("📁 Dữ liệu đã được lưu vào travel_data.json");
   } catch (error) {
-    console.error("Lỗi khi lấy danh sách địa điểm:", error.message);
+    console.error("❌ Lỗi khi lấy danh sách địa điểm:", error.message);
   }
 }
 
