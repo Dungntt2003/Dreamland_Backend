@@ -74,7 +74,6 @@ async function getTravelLinks(mainUrl) {
     if (travelLinks.length > 0) {
       const firstLink = travelLinks[1];
       const destinations = await crawlData(firstLink);
-      // console.log(destinations);
       allDestinations.push(...destinations);
     } else {
       console.log("Không có link nào trong travelLinks.");
@@ -114,12 +113,6 @@ async function crawlMenu(url) {
       menu.push({ itemName, image });
     });
 
-    console.log("Menu: " + menu);
-    menu.forEach((item, index) => {
-      console.log(`Món ${index + 1}:`);
-      console.log(`- Tên: ${item.itemName}`);
-      console.log(`- Ảnh: ${item.image}`);
-    });
     return menu;
   } catch (error) {
     console.error(`Lỗi khi crawl menu từ ${url}:`, error.message);
@@ -157,6 +150,9 @@ async function crawlRestaurants(url) {
             images.push($(img).attr("src"));
           });
 
+        const menu = await crawlMenu(link);
+        const resDetail = await crawlDetailRestaurant(link);
+
         return {
           name,
           link,
@@ -165,16 +161,40 @@ async function crawlRestaurants(url) {
           rating,
           association,
           images,
+          menu,
+          ...resDetail,
         };
       })
     );
 
-    console.log("Danh sách khách sạn & nhà hàng:", restaurants);
-    return restaurants;
+    fs.writeFileSync(
+      "./crawlData/restaurant_data.json",
+      JSON.stringify(restaurants, null, 2),
+      "utf-8"
+    );
+    console.log("Dữ liệu đã được lưu vào restaurant_data.json");
   } catch (error) {
     console.error("Lỗi khi crawl dữ liệu:", error.message);
   }
 }
+
+const crawlDetailRestaurant = async (url) => {
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+    const video = $(".mb_video_detail_detail iframe").attr("src") || "N/A";
+    const descriptionText = $(".detail_menu_res_content").text().trim();
+    const time = $(".box_detail_open_closed").text().trim();
+    return {
+      video,
+      descriptionText,
+      time,
+    };
+  } catch (error) {
+    console.error("Lỗi khi crawl dữ liệu:", error.message);
+    return {};
+  }
+};
 
 async function crawlHotel(url) {
   try {
@@ -205,6 +225,8 @@ async function crawlHotel(url) {
           .each((i, img) => {
             images.push($(img).attr("src"));
           });
+        const detailInfo = await crawlDetailHotel(link);
+        const roomInfo = await crawlRoom(link);
 
         return {
           name,
@@ -214,12 +236,41 @@ async function crawlHotel(url) {
           rating,
           association,
           images,
+          ...detailInfo,
+          roomInfo,
         };
       })
     );
+    fs.writeFileSync(
+      "./crawlData/hotel_data.json",
+      JSON.stringify(restaurants, null, 2),
+      "utf-8"
+    );
+    console.log("Dữ liệu đã được lưu vào hotel_data.json");
+    // console.log("Danh sách khách sạn & nhà hàng:", restaurants);
+    // return restaurants;
+  } catch (error) {
+    console.error("Lỗi khi crawl dữ liệu:", error.message);
+  }
+}
 
-    console.log("Danh sách khách sạn & nhà hàng:", restaurants);
-    return restaurants;
+async function crawlDetailHotel(url) {
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+    const description = $("p.item_travel_content_des").text().trim();
+    let utilities = [];
+    $(".box_item_list_ben_item span.cutTitle").each((_, element) => {
+      utilities.push($(element).text().trim());
+    });
+
+    const services = utilities.join(", ");
+    const result = {
+      description,
+      services,
+    };
+
+    return result;
   } catch (error) {
     console.error("Lỗi khi crawl dữ liệu:", error.message);
   }
@@ -230,65 +281,58 @@ async function crawlRoom(url) {
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
 
-    // Lấy thông tin của phòng đầu tiên
-    const firstRoom = $(".row.item_list_room").first();
+    const rooms = $(".row.item_list_room")
+      .map((_, element) => {
+        const room = $(element);
 
-    const roomName = firstRoom.find(".list_room_right h3").text().trim();
-    const mainImage = firstRoom.find(".js_hotel_img").attr("src")?.trim();
-    const description = firstRoom.find(".item_list_room_des").text().trim();
-    let additionalImages = [];
-    firstRoom.find(".js_list_hotel_img_room").each((i, element) => {
-      additionalImages.push($(element).attr("src")?.trim());
-    });
+        const roomName = room.find(".list_room_right h3").text().trim();
+        const mainImage = room.find(".js_hotel_img").attr("src")?.trim();
+        const description = room.find(".item_list_room_des").text().trim();
 
-    const roomType = firstRoom
-      .find(".list_room_right p span")
-      .first()
-      .text()
-      .replace("Loại phòng  :", "")
-      .trim();
-    const peopleCapacity = firstRoom
-      .find(".fas.fa-user")
-      .parent()
-      .text()
-      .trim();
-    const bedCount = firstRoom
-      .find(".fas.fa-bed")
-      .parent()
-      .text()
-      .replace("Số giường  :", "")
-      .trim();
-    const roomSize = firstRoom.find(".far.fa-square").parent().text().trim();
-    const roomDirection = firstRoom
-      .find(".fas.fa-location-arrow")
-      .parent()
-      .text()
-      .replace("Hướng :", "")
-      .trim();
+        let additionalImages = [];
+        room.find(".js_list_hotel_img_room").each((i, el) => {
+          additionalImages.push($(el).attr("src")?.trim());
+        });
 
-    const price = firstRoom
-      .find(".item_room_value_price")
-      .first()
-      .text()
-      .trim();
+        const roomType = room
+          .find(".list_room_right p span")
+          .first()
+          .text()
+          .replace("Loại phòng  :", "")
+          .trim();
+        const peopleCapacity = room.find(".fas.fa-user").parent().text().trim();
+        const bedCount = room
+          .find(".fas.fa-bed")
+          .parent()
+          .text()
+          .replace("Số giường  :", "")
+          .trim();
+        const roomSize = room.find(".far.fa-square").parent().text().trim();
+        const roomDirection = room
+          .find(".fas.fa-location-arrow")
+          .parent()
+          .text()
+          .replace("Hướng :", "")
+          .trim();
 
-    // Đưa thông tin vào object
-    const roomInfo = {
-      roomName,
-      description,
-      mainImage,
-      additionalImages,
-      roomType,
-      peopleCapacity,
-      bedCount,
-      roomSize,
-      roomDirection,
-      price,
-    };
+        const price = room.find(".item_room_value_price").first().text().trim();
 
-    console.log("Thông tin phòng:", JSON.stringify(roomInfo, null, 2));
+        return {
+          roomName,
+          description,
+          mainImage,
+          additionalImages,
+          roomType,
+          peopleCapacity,
+          bedCount,
+          roomSize,
+          roomDirection,
+          price,
+        };
+      })
+      .get();
 
-    return roomInfo;
+    return rooms;
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu:", error.message);
   }
@@ -299,4 +343,5 @@ module.exports = {
   crawlMenu,
   crawlHotel,
   crawlRoom,
+  crawlDetailHotel,
 };

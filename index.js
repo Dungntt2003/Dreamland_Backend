@@ -14,7 +14,11 @@ const restaurantRoute = require("./routes/restaurantRoute");
 const hotelRoute = require("./routes/hotelRoute");
 const scheduleRoute = require("./routes/scheduleRoute");
 const paymentRoute = require("./routes/paymentRoute");
-const { getTravelLinks } = require("./crawlData/testCrawl");
+const {
+  getTravelLinks,
+  crawlHotel,
+  crawlRestaurants,
+} = require("./crawlData/testCrawl");
 
 const app = express();
 const port = process.env.PORT;
@@ -60,4 +64,6 @@ sequelize
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
   // getTravelLinks("https://63stravel.com/vn");
+  // crawlHotel("https://63stravel.com/vn/hotel/list?page=2");
+  // crawlRestaurants("https://63stravel.com/vn/restaurant/list");
 });
