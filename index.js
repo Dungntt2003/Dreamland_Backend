@@ -64,6 +64,9 @@ sequelize
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
   // getTravelLinks("https://63stravel.com/vn");
-  // crawlHotel("https://63stravel.com/vn/hotel/list?page=2");
+  // crawlHotel([
+  //   "https://63stravel.com/vn/hotel/list?page=1",
+  //   "https://63stravel.com/vn/hotel/list?page=2",
+  // ]);
   // crawlRestaurants("https://63stravel.com/vn/restaurant/list");
 });
