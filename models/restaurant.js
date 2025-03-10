@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       description: {
-        type: DataTypes.TEXT,
+        type: DataTypes.TEXT("long"),
       },
       phone: {
         type: DataTypes.STRING,
@@ -47,6 +47,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       price: {
+        type: DataTypes.STRING,
+      },
+      video: {
         type: DataTypes.STRING,
       },
       open: {

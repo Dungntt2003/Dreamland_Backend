@@ -29,7 +29,7 @@ module.exports = {
         name: hotel.name,
         address: hotel.address,
         images: JSON.stringify(hotel.images),
-        description: `Tiện ích: ${hotel.services};Giới thiệu chi tiết: " "`,
+        description: `Tiện ích: ${hotel.services};Giới thiệu chi tiết: ${hotel.description}`,
         checkin: 14,
         checkout: 12,
         near_location: "",
@@ -39,7 +39,7 @@ module.exports = {
         rooms.push({
           hotel_id: hotelId,
           name: room.roomName,
-          description: `"haha"`,
+          description: `${room.description}, ${room.roomType}, ${room.peopleCapacity}, ${room.bedCount}, ${room.roomSize}, ${room.roomDirection}`,
           image: room.mainImage,
           price: 1200000,
         });

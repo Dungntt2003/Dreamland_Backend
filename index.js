@@ -68,5 +68,9 @@ app.listen(port, () => {
   //   "https://63stravel.com/vn/hotel/list?page=1",
   //   "https://63stravel.com/vn/hotel/list?page=2",
   // ]);
-  // crawlRestaurants("https://63stravel.com/vn/restaurant/list");
+  // crawlRestaurants([
+  //   "https://63stravel.com/vn/restaurant/list?page=1",
+  //   "https://63stravel.com/vn/restaurant/list?page=2",
+  //   "https://63stravel.com/vn/restaurant/list?page=3",
+  // ]);
 });

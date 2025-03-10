@@ -120,56 +120,65 @@ async function crawlMenu(url) {
   }
 }
 
-async function crawlRestaurants(url) {
+async function crawlRestaurants(urls) {
   try {
-    const { data } = await axios.get(url);
-    const $ = cheerio.load(data);
-    let restaurants = [];
+    let allRestaurants = [];
 
-    const elements = $(".item_restaurant").toArray();
+    for (const url of urls) {
+      const { data } = await axios.get(url);
+      const $ = cheerio.load(data);
+      let restaurants = [];
 
-    restaurants = await Promise.all(
-      elements.map(async (element) => {
-        const name = $(element).find(".item_restaurant_title a").text().trim();
-        const link = $(element).find(".item_restaurant_title a").attr("href");
-        const mainImage = $(element).find(".js_hotel_img").attr("src");
-        const address = $(element)
-          .find(".js_item_home_hotel_address")
-          .text()
-          .trim();
-        const rating =
-          $(element).find(".rate-product").attr("data-rating") || "N/A";
-        const association = $(element)
-          .find(".item_home_res_group .group_left")
-          .text()
-          .trim();
-        let images = [];
-        $(element)
-          .find(".js_box_list_image_detal img")
-          .each((i, img) => {
-            images.push($(img).attr("src"));
-          });
+      const elements = $(".item_restaurant").toArray();
 
-        const menu = await crawlMenu(link);
-        const resDetail = await crawlDetailRestaurant(link);
+      const pageRestaurants = await Promise.all(
+        elements.map(async (element) => {
+          const name = $(element)
+            .find(".item_restaurant_title a")
+            .text()
+            .trim();
+          const link = $(element).find(".item_restaurant_title a").attr("href");
+          const mainImage = $(element).find(".js_hotel_img").attr("src");
+          const address = $(element)
+            .find(".js_item_home_hotel_address")
+            .text()
+            .trim();
+          const rating =
+            $(element).find(".rate-product").attr("data-rating") || "N/A";
+          const association = $(element)
+            .find(".item_home_res_group .group_left")
+            .text()
+            .trim();
+          let images = [];
+          $(element)
+            .find(".js_box_list_image_detal img")
+            .each((i, img) => {
+              images.push($(img).attr("src"));
+            });
 
-        return {
-          name,
-          link,
-          mainImage,
-          address,
-          rating,
-          association,
-          images,
-          menu,
-          ...resDetail,
-        };
-      })
-    );
+          const menu = await crawlMenu(link);
+          const resDetail = await crawlDetailRestaurant(link);
+
+          return {
+            name,
+            link,
+            mainImage,
+            address,
+            rating,
+            association,
+            images,
+            menu,
+            ...resDetail,
+          };
+        })
+      );
+
+      allRestaurants = allRestaurants.concat(pageRestaurants);
+    }
 
     fs.writeFileSync(
       "./crawlData/restaurant_data.json",
-      JSON.stringify(restaurants, null, 2),
+      JSON.stringify(allRestaurants, null, 2),
       "utf-8"
     );
     console.log("Dữ liệu đã được lưu vào restaurant_data.json");
