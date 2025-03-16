@@ -24,8 +24,6 @@ module.exports = {
       images: JSON.stringify(place.images || []),
       startTime: 0,
       endTime: 24,
-      // createdAt: new Date(),
-      // updatedAt: new Date(),
       description: place.description,
     }));
     await queryInterface.bulkInsert("Sight", formattedSights);

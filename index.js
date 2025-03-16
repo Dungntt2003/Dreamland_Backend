@@ -15,9 +15,10 @@ const hotelRoute = require("./routes/hotelRoute");
 const scheduleRoute = require("./routes/scheduleRoute");
 const paymentRoute = require("./routes/paymentRoute");
 const {
-  getTravelLinks,
   crawlHotel,
   crawlRestaurants,
+  crawlReactHotelPage,
+  crawlEnters,
 } = require("./crawlData/testCrawl");
 
 const app = express();
@@ -63,7 +64,6 @@ sequelize
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
-  // getTravelLinks("https://63stravel.com/vn");
   // crawlHotel([
   //   "https://63stravel.com/vn/hotel/list?page=1",
   //   "https://63stravel.com/vn/hotel/list?page=2",
@@ -73,4 +73,8 @@ app.listen(port, () => {
   //   "https://63stravel.com/vn/restaurant/list?page=2",
   //   "https://63stravel.com/vn/restaurant/list?page=3",
   // ]);
+  crawlReactHotelPage(
+    "https://www.agoda.com/vi-vn/country/vietnam.html?cid=1844104&ds=vahYdymCywQii1ap"
+  );
+  // crawlEnters("https://www.bestprice.vn/ve-vui-choi");
 });

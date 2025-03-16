@@ -2,6 +2,21 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const fs = require("fs");
 const getProvinceFromURL = require("../utils/getProvince");
+const { chromium } = require("playwright");
+async function crawlReactHotelPage(url) {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  await page.goto(url);
+  await page.waitForLoadState("networkidle");
+
+  const content = await page.content();
+  console.log(content);
+  fs.writeFileSync("./crawlData/output.html", content, "utf-8");
+
+  console.log("✅ Đã lưu nội dung vào output.html");
+  await browser.close();
+}
 
 async function crawlData(url) {
   try {
@@ -357,11 +372,103 @@ async function crawlRoom(url) {
     console.error("Lỗi khi lấy dữ liệu:", error.message);
   }
 }
+
+async function crawlEnters(url) {
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+    const enterLinks = [];
+    const detailLinks = [];
+    const detailData = [];
+    $(".bpt-sub-menu-content-2 a").each((index, element) => {
+      const href = $(element).attr("href");
+      if (href) {
+        enterLinks.push(href);
+      }
+    });
+    $(".dropdown-menu a").each((index, element) => {
+      const href = $(element).attr("href");
+      if (href) {
+        enterLinks.push(href);
+      }
+    });
+    for (const link of enterLinks) {
+      const links = await getDetailEnterLinks(
+        `https://www.bestprice.vn${link}`
+      );
+      detailLinks.push(...links);
+    }
+    for (const link of detailLinks) {
+      const data = await crawlDetailEnter(`https://www.bestprice.vn${link}`);
+      if (data) {
+        detailData.push(data);
+      }
+    }
+    fs.writeFileSync(
+      "./crawlData/entertainment_data.json",
+      JSON.stringify(detailData, null, 2),
+      "utf-8"
+    );
+    console.log("Dữ liệu đã được lưu vào entertainment_data.json");
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
+async function getDetailEnterLinks(url) {
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+    const detailLinks = [];
+    $(".mktnd_txt_productname a").each((index, element) => {
+      const href = $(element).attr("href");
+      if (href) {
+        detailLinks.push(href);
+      }
+    });
+    return detailLinks;
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
+async function crawlDetailEnter(url) {
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+    const images = [];
+    $(".photo-slider .item img").each((index, element) => {
+      images.push($(element).attr("src"));
+    });
+    const placeName = $(".title-detail h1").text().trim();
+
+    const address = $(".address").text().trim();
+
+    let price =
+      $(".ticket-des-button div span span").text().trim() ||
+      "Chưa có thông tin";
+
+    const services = [];
+    $(".list-highlight .highlight-item p").each((index, element) => {
+      services.push($(element).text().trim());
+    });
+    return {
+      placeName,
+      address,
+      price,
+      images,
+      services,
+    };
+  } catch (error) {
+    console.log(error.message);
+  }
+}
 module.exports = {
-  getTravelLinks,
   crawlRestaurants,
   crawlMenu,
   crawlHotel,
   crawlRoom,
   crawlDetailHotel,
+  crawlReactHotelPage,
+  crawlEnters,
 };
