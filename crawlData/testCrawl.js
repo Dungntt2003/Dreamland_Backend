@@ -4,19 +4,50 @@ const fs = require("fs");
 const getProvinceFromURL = require("../utils/getProvince");
 const { chromium } = require("playwright");
 async function crawlReactHotelPage(url) {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ headless: false, slowMo: 100 });
   const page = await browser.newPage();
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
 
-  await page.goto(url);
-  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(5000);
 
-  const content = await page.content();
-  console.log(content);
-  fs.writeFileSync("./crawlData/output.html", content, "utf-8");
+  const elements = await page.$$("a[data-selenium='all-states-link']");
+  console.log(`🔍 Tìm thấy ${elements.length} link`);
 
-  console.log("✅ Đã lưu nội dung vào output.html");
+  if (elements.length === 0) {
+    console.error("❌ Không tìm thấy link nào!");
+    await browser.close();
+    return [];
+  }
+
+  const regionLinks = await page.$$eval(
+    "a[data-selenium='all-states-link']",
+    (links) =>
+      links.map((link) => `https://www.agoda.com/${link.getAttribute("href")}`)
+  );
+
+  console.log("✅ Danh sách link:", regionLinks);
   await browser.close();
 }
+
+async function getHotelReactLink(url) {
+  const browser = await chromium.launch({ headless: true, slowMo: 100 });
+  const page = await browser.newPage();
+
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+
+  await page.waitForSelector('[data-selenium="hotel-card-property-name"] a');
+
+  const hotelLinks = await page.$$eval(
+    '[data-selenium="hotel-card-property-name"] a',
+    (links) => links.map((link) => link.href)
+  );
+
+  console.log(hotelLinks);
+
+  await browser.close();
+}
+
+async function crawlReactHotelData(url) {}
 
 async function crawlData(url) {
   try {
@@ -463,6 +494,21 @@ async function crawlDetailEnter(url) {
     console.log(error.message);
   }
 }
+
+async function crawlGeneral(url) {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  await page.goto(url);
+  await page.waitForLoadState("networkidle");
+
+  const content = await page.content();
+  console.log(content);
+  fs.writeFileSync("./crawlData/output.html", content, "utf-8");
+
+  console.log("✅ Đã lưu nội dung vào output.html");
+  await browser.close();
+}
 module.exports = {
   crawlRestaurants,
   crawlMenu,
@@ -471,4 +517,6 @@ module.exports = {
   crawlDetailHotel,
   crawlReactHotelPage,
   crawlEnters,
+  crawlGeneral,
+  getHotelReactLink,
 };

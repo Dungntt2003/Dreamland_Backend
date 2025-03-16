@@ -19,6 +19,8 @@ const {
   crawlRestaurants,
   crawlReactHotelPage,
   crawlEnters,
+  crawlGeneral,
+  getHotelReactLink,
 } = require("./crawlData/testCrawl");
 
 const app = express();
@@ -73,8 +75,14 @@ app.listen(port, () => {
   //   "https://63stravel.com/vn/restaurant/list?page=2",
   //   "https://63stravel.com/vn/restaurant/list?page=3",
   // ]);
-  crawlReactHotelPage(
-    "https://www.agoda.com/vi-vn/country/vietnam.html?cid=1844104&ds=vahYdymCywQii1ap"
-  );
+  // crawlReactHotelPage(
+  //   "https://www.agoda.com/vi-vn/country/vietnam.html?cid=1844104&ds=vahYdymCywQii1ap"
+  // );
   // crawlEnters("https://www.bestprice.vn/ve-vui-choi");
+  // crawlGeneral(
+  //   "https://www.agoda.com/vi-vn/alagon-zen-hotel-spa/hotel/ho-chi-minh-city-vn.html?ds=vahYdymCywQii1ap"
+  // );
+  // getHotelReactLink(
+  //   "https://www.agoda.com/vi-vn/region/ho-chi-minh-province-vn.html"
+  // );
 });
