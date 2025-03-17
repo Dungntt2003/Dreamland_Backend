@@ -58,6 +58,9 @@ module.exports = (sequelize, DataTypes) => {
       close: {
         type: DataTypes.INTEGER,
       },
+      rate: {
+        type: DataTypes.INTEGER,
+      },
       images: {
         type: DataTypes.TEXT,
         get() {

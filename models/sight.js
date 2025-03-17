@@ -62,6 +62,9 @@ module.exports = (sequelize, DataTypes) => {
       endTime: {
         type: DataTypes.INTEGER,
       },
+      rate: {
+        type: DataTypes.INTEGER,
+      },
     },
     {
       sequelize,

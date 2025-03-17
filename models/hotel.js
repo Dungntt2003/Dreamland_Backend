@@ -51,6 +51,9 @@ module.exports = (sequelize, DataTypes) => {
       near_location: {
         type: DataTypes.TEXT,
       },
+      rate: {
+        type: DataTypes.INTEGER,
+      },
       images: {
         type: DataTypes.TEXT,
         get() {
