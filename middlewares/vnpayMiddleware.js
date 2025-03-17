@@ -1,8 +1,9 @@
+require("dotenv").config();
 const { VNPay, ignoreLogger } = require("vnpay");
 
 const vnpay = new VNPay({
-  tmnCode: "MZHS6NEZ",
-  secureSecret: "OLMEGIFJE0ODTO3SZ0PETBRGUFW2H3FW",
+  tmnCode: process.env.VNP_TMNCODE,
+  secureSecret: process.env.VNP_HASHSECRET,
   vnpayHost: "https://sandbox.vnpayment.vn",
   testMode: true, // tùy chọn, ghi đè vnpayHost thành sandbox nếu là true
   hashAlgorithm: "SHA512", // tùy chọn
