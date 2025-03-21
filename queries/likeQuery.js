@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const db = require("../models/index");
 
 const getLikeList = async (userId) => {
@@ -14,8 +15,14 @@ const createLike = async (likeData) => {
   return like;
 };
 
-const unLike = async (id) => {
-  const like = await db.Liked.findByPk(id);
+const unLike = async (params) => {
+  const like = await db.Liked.findOne({
+    where: {
+      user_id: params.user_id,
+      service_id: params.service_id,
+      service_type: params.service_type,
+    },
+  });
   if (!like) {
     throw new Error("Like not found");
   }

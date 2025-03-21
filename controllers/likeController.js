@@ -28,7 +28,7 @@ const postLike = async (req, res) => {
 
 const deleteLike = async (req, res) => {
   try {
-    await unLike(req.params.id);
+    await unLike(req.body);
     res.status(200).json({
       message: "Like deleted successfully",
     });

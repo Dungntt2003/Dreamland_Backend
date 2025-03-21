@@ -9,6 +9,6 @@ const authenticateToken = require("../middlewares/authMiddleware");
 
 router.get("/:user_id", authenticateToken, getList);
 router.post("/", authenticateToken, postLike);
-router.delete("/:id", authenticateToken, deleteLike);
+router.delete("/", authenticateToken, deleteLike);
 
 module.exports = router;
