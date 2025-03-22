@@ -67,6 +67,12 @@ module.exports = (sequelize, DataTypes) => {
       rate: {
         type: DataTypes.INTEGER,
       },
+      lat: {
+        type: DataTypes.FLOAT,
+      },
+      lng: {
+        type: DataTypes.FLOAT,
+      },
     },
     {
       sequelize,

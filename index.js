@@ -15,6 +15,7 @@ const hotelRoute = require("./routes/hotelRoute");
 const scheduleRoute = require("./routes/scheduleRoute");
 const paymentRoute = require("./routes/paymentRoute");
 const likeRoute = require("./routes/likeRoute");
+const nearRoute = require("./routes/nearLocationRoute");
 const {
   crawlHotel,
   crawlRestaurants,
@@ -54,6 +55,7 @@ app.use("/api/v1/entertainments", entertainmentRoute);
 app.use("/api/v1/restaurants", restaurantRoute);
 app.use("/api/v1/hotels", hotelRoute);
 app.use("/api/v1/like", likeRoute);
+app.use("/api/v1/nearby", nearRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1", authRoute);
 
@@ -87,4 +89,7 @@ app.listen(port, () => {
   // getHotelReactLink(
   //   "https://www.agoda.com/vi-vn/region/ho-chi-minh-province-vn.html"
   // );
+  // (async () => {
+  //   await updateRandomCoordinatesForSights();
+  // })();
 });
