@@ -1,8 +1,9 @@
 const vnpay = require("../middlewares/vnpayMiddleware");
 const { ProductCode, VnpLocale } = require("vnpay");
+const { v4: uuidv4 } = require("uuid");
 const paymentByVnPay = (req, res) => {
   const returnUrl =
-    req.body?.returnUrl || "http://localhost:8000/api/v1/payment/vnpay-return";
+    req.body?.returnUrl || "http://localhost:3000/api/v1/payment/vnpay-return";
 
   // Tạo URL thanh toán
   const paymentUrl = vnpay.buildPaymentUrl({
@@ -12,7 +13,7 @@ const paymentByVnPay = (req, res) => {
       req.connection.remoteAddress ||
       req.socket.remoteAddress ||
       req.ip,
-    vnp_TxnRef: "13",
+    vnp_TxnRef: uuidv4().replace(/-/g, "").slice(0, 13),
     vnp_OrderInfo: "Thanh toan don hang 123456",
     vnp_OrderType: ProductCode.Other,
     vnp_ReturnUrl: returnUrl,
