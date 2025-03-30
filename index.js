@@ -23,6 +23,7 @@ const {
   crawlEnters,
   crawlGeneral,
   getHotelReactLink,
+  crawlReactHotelData,
 } = require("./crawlData/testCrawl");
 
 const app = express();
@@ -70,26 +71,7 @@ sequelize
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
-  // crawlHotel([
-  //   "https://63stravel.com/vn/hotel/list?page=1",
-  //   "https://63stravel.com/vn/hotel/list?page=2",
-  // ]);
-  // crawlRestaurants([
-  //   "https://63stravel.com/vn/restaurant/list?page=1",
-  //   "https://63stravel.com/vn/restaurant/list?page=2",
-  //   "https://63stravel.com/vn/restaurant/list?page=3",
-  // ]);
-  // crawlReactHotelPage(
-  //   "https://www.agoda.com/vi-vn/country/vietnam.html?cid=1844104&ds=vahYdymCywQii1ap"
-  // );
-  // crawlEnters("https://www.bestprice.vn/ve-vui-choi");
-  // crawlGeneral(
-  //   "https://www.agoda.com/vi-vn/alagon-zen-hotel-spa/hotel/ho-chi-minh-city-vn.html?ds=vahYdymCywQii1ap"
-  // );
   // getHotelReactLink(
   //   "https://www.agoda.com/vi-vn/region/ho-chi-minh-province-vn.html"
   // );
-  // (async () => {
-  //   await updateRandomCoordinatesForSights();
-  // })();
 });

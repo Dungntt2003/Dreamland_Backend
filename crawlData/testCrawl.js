@@ -42,12 +42,103 @@ async function getHotelReactLink(url) {
     (links) => links.map((link) => link.href)
   );
 
-  console.log(hotelLinks);
+  const chunks = hotelLinks.slice(0, 5); // Giới hạn 5 khách sạn đầu tiên để test
 
+  const results = await Promise.allSettled(
+    chunks.map((url) => crawlReactHotelData(url))
+  );
+
+  const allHotelData = results
+    .filter((r) => r.status === "fulfilled")
+    .map((r) => r.value);
+
+  console.log(JSON.stringify(allHotelData, null, 2));
   await browser.close();
 }
 
-async function crawlReactHotelData(url) {}
+async function crawlReactHotelData(url) {
+  const browser = await chromium.launch({ headless: true, slowMo: 100 });
+  const page = await browser.newPage();
+
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+
+  await page.waitForTimeout(5000);
+
+  const imageUrls = await page.$$eval(
+    'img[title="Khách sạn Cochin Zen (Cochin Zen Hotel)"]',
+    (imgs) => imgs.map((img) => img.getAttribute("src")).filter(Boolean)
+  );
+  const images = imageUrls.map((img) => `https:${img}`);
+  const name = await page.$eval('h1[data-selenium="hotel-header-name"]', (el) =>
+    el.textContent.trim()
+  );
+  const ratingText = await page.$eval(
+    'span[data-element-name="mosaic-hotel-rating-container"]',
+    (el) => el.getAttribute("aria-label")
+  );
+  const ratingNumber = ratingText ? ratingText.match(/\d+/)[0] : null;
+  const address = await page.$eval(
+    'span[data-selenium="hotel-address-map"]',
+    (el) => el.textContent.trim()
+  );
+  const description = await page.$eval("p.fHvoAu", (el) =>
+    el.textContent.trim()
+  );
+  const highlights = await page.$$eval(
+    '[data-element-name="property-top-feature"]',
+    (items) =>
+      items
+        .map((el) => {
+          const pTag = el.querySelector("p");
+          return pTag?.innerText.trim();
+        })
+        .filter(Boolean)
+  );
+  const facilities = await page.$$eval(
+    '[data-element-name="atf-top-amenities-item"]',
+    (items) =>
+      items
+        .map((el) => {
+          const pTag = el.querySelector("p");
+          return pTag?.innerText.trim();
+        })
+        .filter(Boolean)
+  );
+
+  const rooms = await page.$$eval(".room", (roomNodes) => {
+    return roomNodes.map((room) => {
+      const image = room
+        .querySelector(".room-image-holder img")
+        ?.getAttribute("src");
+
+      const fullImageUrl = image?.startsWith("//") ? "https:" + image : image;
+      const name = room
+        .querySelector(".room-name-with-ellipsis > div")
+        ?.innerText.trim();
+
+      const amenitySpans = room.querySelectorAll(
+        ".room-amenities-list .room-amenitylist-item span"
+      );
+      const amenities = Array.from(amenitySpans).map((span) =>
+        span.innerText.trim()
+      );
+
+      return { fullImageUrl, name, amenities };
+    });
+  });
+
+  await browser.close();
+  return {
+    images,
+    name,
+    ratingNumber,
+    address,
+    description,
+    highlights,
+    facilities,
+    rooms,
+  };
+}
 
 async function crawlData(url) {
   try {
@@ -514,6 +605,7 @@ module.exports = {
   crawlMenu,
   crawlHotel,
   crawlRoom,
+  crawlReactHotelData,
   crawlDetailHotel,
   crawlReactHotelPage,
   crawlEnters,
