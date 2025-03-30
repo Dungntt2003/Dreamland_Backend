@@ -16,6 +16,7 @@ const scheduleRoute = require("./routes/scheduleRoute");
 const paymentRoute = require("./routes/paymentRoute");
 const likeRoute = require("./routes/likeRoute");
 const nearRoute = require("./routes/nearLocationRoute");
+const aiRoute = require("./routes/aiRoute");
 const {
   crawlHotel,
   crawlRestaurants,
@@ -57,6 +58,7 @@ app.use("/api/v1/restaurants", restaurantRoute);
 app.use("/api/v1/hotels", hotelRoute);
 app.use("/api/v1/like", likeRoute);
 app.use("/api/v1/nearby", nearRoute);
+app.use("/api/v1/ai", aiRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1", authRoute);
 
