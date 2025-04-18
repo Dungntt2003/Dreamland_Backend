@@ -19,8 +19,8 @@ const requestAI = async (req, res) => {
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "http://localhost:3000", // Optional (điền URL web của bạn nếu muốn show trên openrouter.ai)
-          "X-Title": "Dreamland Travel Assistant", // Optional (tiêu đề app)
+          "HTTP-Referer": "http://localhost:3000",
+          "X-Title": "Dreamland Travel Assistant",
         },
       }
     );
@@ -36,4 +36,22 @@ const requestAI = async (req, res) => {
   }
 };
 
-module.exports = { requestAI };
+const integrateLLM = async (req, res) => {
+  try {
+    console.log("Request body:", req.body);
+    const response = await axios.post(
+      "http://127.0.0.1:5000/api/generate-description",
+      req.body
+    );
+    res.status(200).json({
+      message: "Get detail description",
+      data: response.data.description,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { requestAI, integrateLLM };
