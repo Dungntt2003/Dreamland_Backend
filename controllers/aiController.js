@@ -7,13 +7,20 @@ const requestAI = async (req, res) => {
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "openai/gpt-3.5-turbo",
-        messages: [{ role: "user", content: question }],
+        model: "google/gemma-3-27b-it:free",
+        messages: [
+          {
+            role: "user",
+            content: question,
+          },
+        ],
       },
       {
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
+          "HTTP-Referer": "http://localhost:3000", // Optional (điền URL web của bạn nếu muốn show trên openrouter.ai)
+          "X-Title": "Dreamland Travel Assistant", // Optional (tiêu đề app)
         },
       }
     );

@@ -52,7 +52,12 @@ async function getHotelReactLink(url) {
     .filter((r) => r.status === "fulfilled")
     .map((r) => r.value);
 
-  console.log(JSON.stringify(allHotelData, null, 2));
+  fs.writeFileSync(
+    "./crawlData/hotel_react_data.json",
+    JSON.stringify(allHotelData, null, 2),
+    "utf-8"
+  );
+  console.log("Dữ liệu đã được lưu vào hotel_react_data.json");
   await browser.close();
 }
 
@@ -590,7 +595,7 @@ async function crawlGeneral(url) {
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
-  await page.goto(url);
+  await page.goto(url, { timeout: 60000 });
   await page.waitForLoadState("networkidle");
 
   const content = await page.content();
