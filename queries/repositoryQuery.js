@@ -23,6 +23,10 @@ const getDemoDetail = async (id) => {
         model: db.DemoRepoDetail,
         as: "demorepodetail",
       },
+      {
+        model: db.ServicePayment,
+        as: "servicepayment",
+      },
     ],
   });
   return repository;

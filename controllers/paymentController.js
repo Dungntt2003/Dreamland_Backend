@@ -1,9 +1,20 @@
 const vnpay = require("../middlewares/vnpayMiddleware");
 const { ProductCode, VnpLocale } = require("vnpay");
+const {
+  createPayment,
+  checkPaymentExists,
+  updatePayment,
+} = require("../queries/paymentQuery");
 const { v4: uuidv4 } = require("uuid");
+
 const paymentByVnPay = (req, res) => {
   const returnUrl =
     req.body?.returnUrl || "http://localhost:3000/api/v1/payment/vnpay-return";
+
+  const extraInfo = {
+    repoId: req.body.repoId,
+    serviceId: req.body.serviceId,
+  };
 
   const paymentUrl = vnpay.buildPaymentUrl({
     vnp_Amount: req.body.amount,
@@ -13,7 +24,7 @@ const paymentByVnPay = (req, res) => {
       req.socket.remoteAddress ||
       req.ip,
     vnp_TxnRef: uuidv4().replace(/-/g, "").slice(0, 13),
-    vnp_OrderInfo: req.body.orderInfo,
+    vnp_OrderInfo: Buffer.from(JSON.stringify(extraInfo)).toString("base64"),
     vnp_OrderType: ProductCode.Other,
     vnp_ReturnUrl: returnUrl,
     vnp_Locale: VnpLocale.VN,
@@ -39,4 +50,57 @@ const paymentReturn = (req, res) => {
   return res.send("Xác thực URL trả về thành công");
 };
 
-module.exports = { paymentByVnPay, paymentReturn };
+const createNewPayment = async (req, res) => {
+  try {
+    const payment = await createPayment(req.body);
+    res.status(200).json({
+      message: "Create payment successfully",
+      data: payment,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Create payment failed",
+      error: error.message,
+    });
+  }
+};
+
+const checkPaymentHaveExisted = async (req, res) => {
+  try {
+    const payment = await checkPaymentExists(req.body);
+    if (!payment) {
+      return res.status(404).json({
+        message: "Payment not found",
+      });
+    }
+    res.status(200).json({
+      message: "Check payment successfully",
+      data: payment,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const editPayment = async (req, res) => {
+  try {
+    const payment = await updatePayment(req.params.id, req.body);
+    res.status(200).json({
+      message: "Update payment successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+module.exports = {
+  paymentByVnPay,
+  paymentReturn,
+  createNewPayment,
+  checkPaymentHaveExisted,
+  editPayment,
+};
