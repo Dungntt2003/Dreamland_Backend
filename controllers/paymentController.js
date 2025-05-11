@@ -4,6 +4,7 @@ const {
   createPayment,
   checkPaymentExists,
   updatePayment,
+  getPayment,
 } = require("../queries/paymentQuery");
 const { v4: uuidv4 } = require("uuid");
 
@@ -97,10 +98,25 @@ const editPayment = async (req, res) => {
   }
 };
 
+const getPaymentWithId = async (req, res) => {
+  try {
+    const payment = await getPayment(req.params.repoId, req.params.serviceId);
+    res.status(200).json({
+      message: "Get payment successfully",
+      data: payment,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   paymentByVnPay,
   paymentReturn,
   createNewPayment,
   checkPaymentHaveExisted,
   editPayment,
+  getPaymentWithId,
 };

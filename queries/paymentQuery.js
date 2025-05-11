@@ -22,4 +22,53 @@ const updatePayment = async (paymentId, paymentData) => {
   return payment;
 };
 
-module.exports = { createPayment, checkPaymentExists, updatePayment };
+const getPayment = async (repository_id, service_id) => {
+  const payment = await db.ServicePayment.findOne({
+    where: {
+      repository_id: repository_id,
+      service_id: service_id,
+    },
+  });
+  if (!payment) return null;
+
+  let includeModel = null;
+  let alias = "";
+
+  switch (payment.service_type) {
+    case "entertainment":
+      includeModel = db.Entertainment;
+      alias = "entertainment";
+      break;
+    case "hotel":
+      includeModel = db.Hotel;
+      alias = "hotel";
+      break;
+    case "restaurant":
+      includeModel = db.Restaurant;
+      alias = "restaurant";
+      break;
+    default:
+      return payment;
+  }
+  const paymentWithService = await db.ServicePayment.findOne({
+    where: {
+      repository_id: repository_id,
+      service_id: service_id,
+    },
+    include: [
+      {
+        model: includeModel,
+        as: alias,
+      },
+    ],
+  });
+
+  return paymentWithService;
+};
+
+module.exports = {
+  createPayment,
+  checkPaymentExists,
+  updatePayment,
+  getPayment,
+};

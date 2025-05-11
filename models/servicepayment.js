@@ -78,6 +78,18 @@ module.exports = (sequelize, DataTypes) => {
       result: {
         type: DataTypes.ENUM("fail", "success", "pending"),
       },
+      countAdult: {
+        type: DataTypes.INTEGER,
+      },
+      countChild: {
+        type: DataTypes.INTEGER,
+      },
+      orderDate: {
+        type: DataTypes.STRING,
+      },
+      subId: {
+        type: DataTypes.INTEGER,
+      },
     },
     {
       sequelize,
