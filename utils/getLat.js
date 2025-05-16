@@ -1,5 +1,9 @@
 const geocoder = require("../middlewares/mapMiddleware");
-const db = require("../models/index");
+
+function getRandomInRange(min, max) {
+  return parseFloat((Math.random() * (max - min) + min).toFixed(6));
+}
+
 async function getCoordinatesFromAddress(address) {
   try {
     const res = await geocoder.geocode(address);
@@ -15,50 +19,38 @@ async function getCoordinatesFromAddress(address) {
   return null;
 }
 
-async function updateSightWithCoordinates(sight) {
-  const coords = await getCoordinatesFromAddress(sight.address);
-  if (coords) {
-    sight.lat = coords.lat;
-    sight.lng = coords.lng;
-    await sight.save();
-  }
-}
-
-async function updateAllSights() {
-  const sights = await db.Restaurant.findAll({
+async function updateCoordinatesForModel(model) {
+  const records = await model.findAll({
     where: {
       lat: null,
       lng: null,
     },
   });
 
-  for (const sight of sights) {
-    await updateSightWithCoordinates(sight);
+  for (const record of records) {
+    let coords = null;
+
+    if (record.address) {
+      coords = await getCoordinatesFromAddress(record.address);
+    }
+    if (!coords) {
+      coords = {
+        lat: getRandomInRange(8.0, 23.5),
+        lng: getRandomInRange(102.0, 109.5),
+      };
+      console.log(
+        `Randomed ${record.name}: lat=${coords.lat}, lng=${coords.lng}`
+      );
+    } else {
+      console.log(
+        `Geocoded ${record.name}: lat=${coords.lat}, lng=${coords.lng}`
+      );
+    }
+
+    record.lat = coords.lat;
+    record.lng = coords.lng;
+    await record.save();
   }
 }
 
-async function updateRandomCoordinatesForSights() {
-  const sights = await db.Restaurant.findAll({
-    where: {
-      lat: null,
-      lng: null,
-    },
-  });
-
-  for (const sight of sights) {
-    const randomLat = getRandomInRange(8.0, 23.5);
-    const randomLng = getRandomInRange(102.0, 109.5);
-
-    sight.lat = randomLat;
-    sight.lng = randomLng;
-    await sight.save();
-
-    console.log(`Updated ${sight.name}: lat=${randomLat}, lng=${randomLng}`);
-  }
-}
-
-function getRandomInRange(min, max) {
-  return parseFloat((Math.random() * (max - min) + min).toFixed(6));
-}
-
-module.exports = updateRandomCoordinatesForSights;
+module.exports = updateCoordinatesForModel;

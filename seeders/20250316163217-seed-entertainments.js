@@ -2,6 +2,7 @@
 const fs = require("fs");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
+const { getRandomPriceEnter } = require("../utils/getRandomPrice");
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -20,17 +21,25 @@ module.exports = {
     );
     const rawData = fs.readFileSync(filePath, "utf8");
     const entertainments = JSON.parse(rawData);
-    const formattedEnters = entertainments.map((place) => ({
-      id: uuidv4(),
-      name: place.placeName,
-      address: place.address,
-      images: JSON.stringify(place.images || []),
-      price: place.price,
-      startTime: 0,
-      endTime: 24,
-      description: place.services.join(", "),
-    }));
-    await queryInterface.bulkInsert("Entertainment", formattedEnters);
+    const formattedEnters = entertainments
+      .filter((place) => place.placeName && place.placeName.trim() !== "")
+      .map((place) => ({
+        id: uuidv4(),
+        name: place.placeName,
+        address: place.address,
+        images: JSON.stringify(place.images || []),
+        price:
+          place.price === "Chưa có thông tin"
+            ? getRandomPriceEnter()
+            : place.price,
+        startTime: 0,
+        endTime: 24,
+        description: place.services.join(", "),
+      }));
+
+    if (formattedEnters.length > 0) {
+      await queryInterface.bulkInsert("Entertainment", formattedEnters);
+    }
   },
 
   async down(queryInterface, Sequelize) {
