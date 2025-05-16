@@ -182,7 +182,7 @@ async function crawlData(url) {
         province,
       });
     });
-
+    console.log("Done url: ", url);
     return destinations;
   } catch (error) {
     console.error("❌ Lỗi khi crawl dữ liệu:", error.message);
@@ -194,37 +194,23 @@ async function getTravelLinks(mainUrl) {
   try {
     const { data } = await axios.get(mainUrl);
     const $ = cheerio.load(data);
-
     let travelLinks = [];
 
-    $(".tab_item_content_you a").each((i, element) => {
+    $(".item_why_province a").each((i, element) => {
       let href = $(element).attr("href");
-      if (href) {
+      if (href && href.startsWith(`${mainUrl}vn/travel`)) {
         travelLinks.push(href);
       }
     });
 
-    console.log("📌 Danh sách URL địa điểm du lịch:", travelLinks);
+    // console.log("📌 Danh sách URL địa điểm du lịch:", travelLinks);
 
     let allDestinations = [];
 
-    // for (let link of travelLinks) {
-    //   const destinations = await crawlData(link);
-    //   console.log(destinations);
-    //   allDestinations.push(...destinations);
-    // }
-    if (travelLinks.length > 0) {
-      const firstLink = travelLinks[1];
-      const destinations = await crawlData(firstLink);
+    for (let link of travelLinks) {
+      const destinations = await crawlData(link);
       allDestinations.push(...destinations);
-    } else {
-      console.log("Không có link nào trong travelLinks.");
     }
-
-    console.log(
-      "✅ Dữ liệu tổng hợp:",
-      JSON.stringify(allDestinations, null, 2)
-    );
     fs.writeFileSync(
       "./crawlData/travel_data.json",
       JSON.stringify(allDestinations, null, 2),
@@ -616,4 +602,5 @@ module.exports = {
   crawlEnters,
   crawlGeneral,
   getHotelReactLink,
+  getTravelLinks,
 };

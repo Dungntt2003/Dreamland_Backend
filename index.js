@@ -26,7 +26,15 @@ const {
   crawlGeneral,
   getHotelReactLink,
   crawlReactHotelData,
+  getTravelLinks,
 } = require("./crawlData/testCrawl");
+
+const {
+  getLinkHotel,
+  getProvinceRestaurant,
+  getDetailResLinks,
+  getDetailRes,
+} = require("./crawlData/moreCrawl");
 
 const app = express();
 const port = process.env.PORT;
@@ -75,7 +83,6 @@ sequelize
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
-  // getHotelReactLink(
-  //   "https://www.agoda.com/vi-vn/region/ho-chi-minh-province-vn.html"
-  // );
+  // getProvinceRestaurant("https://pasgo.vn/");
+  // getTravelLinks("https://travelviet.net/");
 });
