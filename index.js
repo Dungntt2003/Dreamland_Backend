@@ -18,24 +18,6 @@ const likeRoute = require("./routes/likeRoute");
 const nearRoute = require("./routes/nearLocationRoute");
 const aiRoute = require("./routes/aiRoute");
 const mailRoute = require("./routes/mailRoute");
-const {
-  crawlHotel,
-  crawlRestaurants,
-  crawlReactHotelPage,
-  crawlEnters,
-  crawlGeneral,
-  getHotelReactLink,
-  crawlReactHotelData,
-  getTravelLinks,
-} = require("./crawlData/testCrawl");
-
-const {
-  getLinkHotel,
-  getProvinceRestaurant,
-  getDetailResLinks,
-  getDetailRes,
-} = require("./crawlData/moreCrawl");
-
 const app = express();
 const port = process.env.PORT;
 
@@ -83,6 +65,4 @@ sequelize
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
-  // getProvinceRestaurant("https://pasgo.vn/");
-  // getTravelLinks("https://travelviet.net/");
 });
