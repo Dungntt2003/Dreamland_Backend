@@ -8,7 +8,7 @@ const {
 } = require("../controllers/demoRepoController");
 
 router.post("/", authenticationToken, addToRepo);
-router.delete("/:repoId", authenticationToken, removeFromRepo);
+router.delete("/", authenticationToken, removeFromRepo);
 router.get("/services/:repoId", authenticationToken, getServicesData);
 
 module.exports = router;

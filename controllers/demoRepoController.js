@@ -18,10 +18,19 @@ const addToRepo = async (req, res) => {
 };
 const removeFromRepo = async (req, res) => {
   try {
+    const { service_id, service_type, repo_id } = req.query;
+
+    if (!service_id || !service_type || !repo_id) {
+      return res
+        .status(400)
+        .json({ message: "Missing required query parameters" });
+    }
+
     const deletedService = await removeServiceFromRepo(
-      req.body,
-      req.params.repoId
+      { service_id, service_type },
+      repo_id
     );
+
     if (deletedService) {
       res.status(200).json({
         message: "Service removed from repository",
