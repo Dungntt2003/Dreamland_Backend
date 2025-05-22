@@ -1,6 +1,7 @@
 const {
   addNewServiceToRepo,
   getServicesInRepo,
+  removeServiceFromRepo,
 } = require("../queries/demoRepoQuery");
 
 const addToRepo = async (req, res) => {
@@ -12,6 +13,24 @@ const addToRepo = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+const removeFromRepo = async (req, res) => {
+  try {
+    const deletedService = await removeServiceFromRepo(
+      req.body,
+      req.params.repoId
+    );
+    if (deletedService) {
+      res.status(200).json({
+        message: "Service removed from repository",
+        data: deletedService,
+      });
+    } else {
+      res.status(404).json({ message: "Service not found" });
+    }
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
@@ -30,4 +49,4 @@ const getServicesData = async (req, res) => {
   }
 };
 
-module.exports = { addToRepo, getServicesData };
+module.exports = { addToRepo, getServicesData, removeFromRepo };

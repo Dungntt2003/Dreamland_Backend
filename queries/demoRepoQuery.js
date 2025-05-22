@@ -4,6 +4,18 @@ const addNewServiceToRepo = async (serviceData) => {
   return demoService;
 };
 
+const removeServiceFromRepo = async (serviceData, repoId) => {
+  const { service_id, service_type } = serviceData;
+  const deletedService = await db.DemoRepoDetail.destroy({
+    where: {
+      service_id: service_id,
+      service_type: service_type,
+      repository_id: repoId,
+    },
+  });
+  return deletedService;
+};
+
 const getServicesInRepo = async (repoId) => {
   const servicesData = await db.DemoRepoDetail.findAll({
     where: { repository_id: repoId },
@@ -42,4 +54,8 @@ const getServicesInRepo = async (repoId) => {
   return servicesData;
 };
 
-module.exports = { addNewServiceToRepo, getServicesInRepo };
+module.exports = {
+  addNewServiceToRepo,
+  getServicesInRepo,
+  removeServiceFromRepo,
+};

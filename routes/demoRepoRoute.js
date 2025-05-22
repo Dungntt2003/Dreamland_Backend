@@ -4,9 +4,11 @@ const authenticationToken = require("../middlewares/authMiddleware");
 const {
   addToRepo,
   getServicesData,
+  removeFromRepo,
 } = require("../controllers/demoRepoController");
 
 router.post("/", authenticationToken, addToRepo);
+router.delete("/:repoId", authenticationToken, removeFromRepo);
 router.get("/services/:repoId", authenticationToken, getServicesData);
 
 module.exports = router;
