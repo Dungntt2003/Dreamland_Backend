@@ -39,4 +39,26 @@ const updateDescription = async (id, repoData) => {
   return updatedRepo;
 };
 
-module.exports = { createRepo, getDemoDetail, updateDescription, getRepoList };
+const updateStatus = async (id) => {
+  try {
+    const repo = await db.Repository.findByPk(id);
+    if (!repo) {
+      throw new Error("Repo not found");
+    }
+
+    repo.isHidden = !repo.isHidden;
+    await repo.save();
+    return repo;
+  } catch (error) {
+    console.error("Failed to update status:", error);
+    throw error;
+  }
+};
+
+module.exports = {
+  createRepo,
+  getDemoDetail,
+  updateDescription,
+  getRepoList,
+  updateStatus,
+};

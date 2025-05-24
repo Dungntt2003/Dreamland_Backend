@@ -51,6 +51,10 @@ module.exports = (sequelize, DataTypes) => {
       description: {
         type: DataTypes.TEXT,
       },
+      isHidden: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
       numberPeople: {
         type: DataTypes.INTEGER,
         validate: {

@@ -3,6 +3,7 @@ const {
   getDemoDetail,
   updateDescription,
   getRepoList,
+  updateStatus,
 } = require("../queries/repositoryQuery");
 
 const getAll = async (req, res) => {
@@ -58,4 +59,23 @@ const updateRepoWithDes = async (req, res) => {
   }
 };
 
-module.exports = { createNew, getFullDemo, updateRepoWithDes, getAll };
+const updateStatusRepo = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const updatedRepo = await updateStatus(id);
+    res.status(200).json({
+      message: "Repository status updated successfully",
+      data: updatedRepo,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  createNew,
+  getFullDemo,
+  updateRepoWithDes,
+  getAll,
+  updateStatusRepo,
+};
