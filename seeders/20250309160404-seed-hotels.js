@@ -16,7 +16,7 @@ module.exports = {
      * }], {});
      */
 
-    const filePath = path.join(__dirname, "../crawlData/hotels_p2.json");
+    const filePath = path.join(__dirname, "../crawlData/hotels_v2.json");
     const rawData = fs.readFileSync(filePath, "utf8");
     const hotelsData = JSON.parse(rawData);
 

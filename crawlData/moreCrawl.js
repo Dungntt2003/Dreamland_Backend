@@ -34,6 +34,47 @@ const processInBatches = async (items, batchSize, callback) => {
   }
 };
 
+function cleanText(text) {
+  if (!text) return "";
+
+  let cleaned = text.replace(/[\t\n\r]+/g, " ").trim();
+
+  const parts = cleaned.split(/\s+/).filter((part) => part.length > 0);
+
+  const uniqueParts = [];
+  const seen = new Set();
+
+  for (const part of parts) {
+    const cleanPart = part.toLowerCase();
+    if (!seen.has(cleanPart)) {
+      seen.add(cleanPart);
+      uniqueParts.push(part);
+    }
+  }
+
+  return uniqueParts.join(" ");
+}
+
+function cleanRoomInfo(text) {
+  if (!text) return "";
+
+  let cleaned = text.replace(/[\t\n\r]+/g, " ").trim();
+
+  const parts = cleaned
+    .split(/\s{3,}/)
+    .filter((part) => part.trim().length > 0);
+
+  if (parts.length > 1) {
+    return parts.reduce((shortest, current) =>
+      current.trim().length < shortest.trim().length
+        ? current.trim()
+        : shortest.trim()
+    );
+  }
+
+  return cleaned;
+}
+
 /**
  * Lấy danh sách link khách sạn từ trang chủ
  * @param {string} url - URL trang chủ
@@ -265,9 +306,10 @@ async function getDetail(url) {
       const starsMatch = starClass?.match(/ico-star-(\d)/);
       const stars = starsMatch ? parseInt(starsMatch[1]) : null;
 
-      const rating =
-        $(".review-number span.bg-color-very-good").text().trim() ||
-        $(".review-number span").first().text().trim();
+      const rating = cleanText(
+        $(".review-number span.bg-color-very-good").text() ||
+          $(".review-number span").first().text()
+      );
 
       const imageUrls = [];
       $("img.owl-lazy-img").each((_, img) => {
@@ -292,18 +334,18 @@ async function getDetail(url) {
       $(".room_type__td").each((_, roomEl) => {
         const room = $(roomEl);
 
-        const roomName = room
-          .find(".room_type__item__img__name p")
-          .text()
-          .trim();
-        if (!roomName) return; // Bỏ qua phòng không có tên
+        const roomName = cleanText(
+          room.find(".room_type__item__img__name p").text()
+        );
+        if (!roomName) return;
 
         const image =
           room.find(".room_type__item__img img").attr("data-src") || "";
-        const area = room.find(".ico-square").parent().text().trim();
-        const capacity = room.find(".ico-user").parent().text().trim();
-        const view = room.find(".ico-garden").parent().text().trim();
-        const bed = room.find(".ico-bed").parent().text().trim();
+
+        const area = cleanRoomInfo(room.find(".ico-square").parent().text());
+        const capacity = cleanRoomInfo(room.find(".ico-user").parent().text());
+        const view = cleanRoomInfo(room.find(".ico-garden").parent().text());
+        const bed = cleanRoomInfo(room.find(".ico-bed").parent().text());
 
         rooms.push({
           name: roomName,
@@ -345,15 +387,102 @@ async function getDetail(url) {
   }
 }
 
+const slugToProvinceName = (slug) => {
+  const provinceMap = {
+    "ha-noi": "Hà Nội",
+    "ho-chi-minh": "Hồ Chí Minh",
+    "da-nang": "Đà Nẵng",
+    "hai-phong": "Hải Phòng",
+    "can-tho": "Cần Thơ",
+    "an-giang": "An Giang",
+    "ba-ria-vung-tau": "Bà Rịa - Vũng Tàu",
+    "bac-giang": "Bắc Giang",
+    "bac-kan": "Bắc Kạn",
+    "bac-lieu": "Bạc Liêu",
+    "bac-ninh": "Bắc Ninh",
+    "ben-tre": "Bến Tre",
+    "binh-dinh": "Bình Định",
+    "binh-duong": "Bình Dương",
+    "binh-phuoc": "Bình Phước",
+    "binh-thuan": "Bình Thuận",
+    "ca-mau": "Cà Mau",
+    "cao-bang": "Cao Bằng",
+    "dak-lak": "Đắk Lắk",
+    "dak-nong": "Đắk Nông",
+    "dien-bien": "Điện Biên",
+    "dong-nai": "Đồng Nai",
+    "dong-thap": "Đồng Tháp",
+    "gia-lai": "Gia Lai",
+    "ha-giang": "Hà Giang",
+    "ha-nam": "Hà Nam",
+    "ha-tinh": "Hà Tĩnh",
+    "hai-duong": "Hải Dương",
+    "hau-giang": "Hậu Giang",
+    "hoa-binh": "Hòa Bình",
+    "hung-yen": "Hưng Yên",
+    "khanh-hoa": "Khánh Hòa",
+    "kien-giang": "Kiên Giang",
+    "kon-tum": "Kon Tum",
+    "lai-chau": "Lai Châu",
+    "lam-dong": "Lâm Đồng",
+    "lang-son": "Lạng Sơn",
+    "lao-cai": "Lào Cai",
+    "long-an": "Long An",
+    "nam-dinh": "Nam Định",
+    "nghe-an": "Nghệ An",
+    "ninh-binh": "Ninh Bình",
+    "ninh-thuan": "Ninh Thuận",
+    "phu-tho": "Phú Thọ",
+    "phu-yen": "Phú Yên",
+    "quang-binh": "Quảng Bình",
+    "quang-nam": "Quảng Nam",
+    "quang-ngai": "Quảng Ngãi",
+    "quang-ninh": "Quảng Ninh",
+    "quang-tri": "Quảng Trị",
+    "soc-trang": "Sóc Trăng",
+    "son-la": "Sơn La",
+    "tay-ninh": "Tây Ninh",
+    "thai-binh": "Thái Bình",
+    "thai-nguyen": "Thái Nguyên",
+    "thanh-hoa": "Thanh Hóa",
+    "thua-thien-hue": "Thừa Thiên Huế",
+    "tien-giang": "Tiền Giang",
+    "tra-vinh": "Trà Vinh",
+    "tuyen-quang": "Tuyên Quang",
+    "vinh-long": "Vĩnh Long",
+    "vinh-phuc": "Vĩnh Phúc",
+    "yen-bai": "Yên Bái",
+  };
+
+  return provinceMap[slug] || slug;
+};
+
+const getProvinceFromUrl = (url) => {
+  try {
+    const urlParts = url.split("/");
+    const provinceSlug = urlParts.find(
+      (part) =>
+        part.includes("-") &&
+        !part.includes("nha-hang") &&
+        !part.includes("page=")
+    );
+    return provinceSlug ? slugToProvinceName(provinceSlug) : "";
+  } catch (error) {
+    return "";
+  }
+};
+
 const getProvinceRestaurant = async (url) => {
   try {
     const allDetails = [];
     const { data } = await axiosInstance.get(url);
     const $ = cheerio.load(data);
     const provinceNames = [];
+
     $("#provinceId option").each((i, el) => {
       provinceNames.push($(el).text().trim());
     });
+
     const slugs = provinceNames.map(slugify);
     const urls = slugs.flatMap((slug) => {
       return Array.from(
@@ -371,7 +500,6 @@ const getProvinceRestaurant = async (url) => {
       }
     });
 
-    // console.log(allDetails);
     fs.writeFileSync(
       "./crawlData/restaurants.json",
       JSON.stringify(allDetails, null, 2),
@@ -397,10 +525,13 @@ const getDetailResLinks = async (url) => {
       }
     });
 
+    const provinceName = getProvinceFromUrl(url);
+
     for (const link of links) {
-      const detail = await getDetailRes(link);
+      const detail = await getDetailRes(link, provinceName);
       details.push(detail);
     }
+
     console.log("Done get detail restaurant links ", url);
     return details;
   } catch (error) {
@@ -409,12 +540,13 @@ const getDetailResLinks = async (url) => {
   }
 };
 
-const getDetailRes = async (url) => {
+const getDetailRes = async (url, provinceName = "") => {
   try {
     const { data } = await axiosInstance.get(url);
     const $ = cheerio.load(data);
     const imageUrls = [];
     const imgMenu = [];
+
     $("ul.splide__list img").each((_, img) => {
       const dataSrc = $(img).attr("data-src");
       const src = $(img).attr("src");
@@ -425,22 +557,30 @@ const getDetailRes = async (url) => {
         imageUrls.push(src);
       }
     });
+
     const name = $("h1.star-heading").text().trim();
-    const address = $("span.text-address").text().trim();
+    let address = $("span.text-address").text().trim();
+
+    if (
+      provinceName &&
+      address &&
+      !address.toLowerCase().includes(provinceName.toLowerCase())
+    ) {
+      address = `${address}, ${provinceName}`;
+    }
 
     const type = $("span.text_type").text().trim();
-
     const priceRange = $("span.pasgo-giatrungbinh").text().trim();
-
     const openingHours = $('div[itemscope] [itemprop="openingHours"]').attr(
       "content"
     );
-    const menuImgElements = $(".price-list .items img.c-img-price");
 
+    const menuImgElements = $(".price-list .items img.c-img-price");
     menuImgElements.each((index, element) => {
       const imageUrl = $(element).attr("data-src");
       imgMenu.push(imageUrl);
     });
+
     const parking = {
       car: {
         place: $(
@@ -465,6 +605,7 @@ const getDetailRes = async (url) => {
       const name = $(element).find("p.text-color-black").text();
       utilities.push(name);
     });
+
     console.log("Done get detail restaurant ", url);
     return {
       name,
@@ -476,6 +617,7 @@ const getDetailRes = async (url) => {
       imgMenu,
       parking,
       utilities,
+      province: provinceName,
     };
   } catch (error) {
     console.log(error);

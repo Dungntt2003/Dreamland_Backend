@@ -32,7 +32,10 @@ async function updateCoordinatesForModel(model) {
 
     if (record.address) {
       coords = await getCoordinatesFromAddress(record.address);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
+
     if (!coords) {
       coords = {
         lat: getRandomInRange(8.0, 23.5),
