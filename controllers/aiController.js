@@ -48,6 +48,7 @@ const integrateLLM = async (req, res) => {
       data: response.data.description,
     });
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({
       message: error.message,
     });

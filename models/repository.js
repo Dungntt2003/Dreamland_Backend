@@ -55,6 +55,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
+      experience: {
+        type: DataTypes.TEXT("long"),
+      },
       numberPeople: {
         type: DataTypes.INTEGER,
         validate: {
