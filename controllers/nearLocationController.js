@@ -16,6 +16,42 @@ const getModelByType = (type) => {
   }
 };
 
+const calculateDistance = (lat1, lng1, lat2, lng2) => {
+  const earthRadius = 6371;
+
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLng = (lng2 - lng1) * (Math.PI / 180);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLng / 2) ** 2;
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = earthRadius * c;
+
+  return Math.round(distance * 100) / 100;
+};
+
+const parseImages = (imagesString) => {
+  try {
+    if (!imagesString) return [];
+
+    if (Array.isArray(imagesString)) return imagesString;
+
+    if (typeof imagesString === "string") {
+      const parsed = JSON.parse(imagesString);
+      return Array.isArray(parsed) ? parsed : [];
+    }
+
+    return [];
+  } catch (error) {
+    console.warn("Error parsing images:", error);
+    return [];
+  }
+};
+
 const getNearbyLocations = async (req, res) => {
   try {
     const { type, id, radius = 5 } = req.query;
@@ -31,10 +67,7 @@ const getNearbyLocations = async (req, res) => {
     }
 
     const { lat, lng } = selected;
-    const earthRadius = 6371;
-
     const allModels = [db.Sight, db.Entertainment, db.Hotel, db.Restaurant];
-
     const nearbyResults = [];
 
     for (const model of allModels) {
@@ -46,30 +79,50 @@ const getNearbyLocations = async (req, res) => {
         },
       });
 
-      // Tính khoảng cách theo công thức Haversine
-      const filtered = results.filter((item) => {
-        const dLat = (item.lat - lat) * (Math.PI / 180);
-        const dLng = (item.lng - lng) * (Math.PI / 180);
-        const a =
-          Math.sin(dLat / 2) ** 2 +
-          Math.cos(lat * (Math.PI / 180)) *
-            Math.cos(item.lat * (Math.PI / 180)) *
-            Math.sin(dLng / 2) ** 2;
+      const processedResults = results
+        .map((item) => {
+          const distance = calculateDistance(lat, lng, item.lat, item.lng);
+          if (distance <= radius) {
+            const itemData = { ...item.dataValues };
 
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = earthRadius * c;
+            if (itemData.images) {
+              itemData.images = parseImages(itemData.images);
+            }
 
-        return distance <= radius;
-      });
+            return {
+              ...itemData,
+              type: model.name.toLowerCase(),
+              distance: distance,
+              distanceUnit: "km",
+            };
+          }
+          return null;
+        })
+        .filter((item) => item !== null);
 
-      filtered.forEach((item) => {
-        item.dataValues.type = model.name.toLowerCase();
-      });
-
-      nearbyResults.push(...filtered);
+      nearbyResults.push(...processedResults);
     }
 
-    res.json({ nearby: nearbyResults });
+    nearbyResults.sort((a, b) => a.distance - b.distance);
+    const uniqueResults = [];
+    const seenDistances = new Set();
+
+    for (const item of nearbyResults) {
+      if (!seenDistances.has(item.distance)) {
+        seenDistances.add(item.distance);
+        uniqueResults.push(item);
+      }
+    }
+    res.json({
+      nearby: uniqueResults,
+      total: uniqueResults.length,
+      center: {
+        lat: lat,
+        lng: lng,
+        radius: radius,
+        radiusUnit: "km",
+      },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
