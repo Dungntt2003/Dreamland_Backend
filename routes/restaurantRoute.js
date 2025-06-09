@@ -9,8 +9,8 @@ const {
 const upload = require("../middlewares/uploadImg");
 const authenticateToken = require("../middlewares/authMiddleware");
 
-router.get("/", authenticateToken, getList);
-router.get("/:id", authenticateToken, getDetail);
+router.get("/", getList);
+router.get("/:id", getDetail);
 router.post("/", authenticateToken, upload.array("images", 5), insertRes);
 router.post("/dish", authenticateToken, upload.single("image"), insertNewDish);
 

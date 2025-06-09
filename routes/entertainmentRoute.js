@@ -8,8 +8,8 @@ const {
 } = require("../controllers/entertainmentController");
 const authenticateToken = require("../middlewares/authMiddleware");
 
-route.get("/", authenticateToken, getListEnters);
-route.get("/:id", authenticateToken, getEnterDetail);
+route.get("/", getListEnters);
+route.get("/:id", getEnterDetail);
 route.post("/", authenticateToken, upload.array("images", 5), createNewEnter);
 
 module.exports = route;
