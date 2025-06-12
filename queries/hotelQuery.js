@@ -1,7 +1,9 @@
 const db = require("../models/index");
 
 const getListHotels = async () => {
-  const hotels = await db.Hotel.findAll();
+  const hotels = await db.Hotel.findAll({
+    include: [{ model: db.Room, as: "room" }],
+  });
   return hotels;
 };
 
