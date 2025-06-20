@@ -13,7 +13,7 @@ const entertainmentRoute = require("./routes/entertainmentRoute");
 const restaurantRoute = require("./routes/restaurantRoute");
 const hotelRoute = require("./routes/hotelRoute");
 const scheduleRoute = require("./routes/scheduleRoute");
-const paymentRoute = require("./routes/paymentRoute");
+// const paymentRoute = require("./routes/paymentRoute");
 const likeRoute = require("./routes/likeRoute");
 const nearRoute = require("./routes/nearLocationRoute");
 const aiRoute = require("./routes/aiRoute");
@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 app.use("/api/v1/repositories", repositoryRoute);
 app.use("/api/v1/demoRepo", demoRepoDetailRoute);
 app.use("/api/v1/schedules", scheduleRoute);
-app.use("/api/v1/payment", paymentRoute);
+// app.use("/api/v1/payment", paymentRoute);
 app.use("/api/v1/sights", sightRoute);
 app.use("/api/v1/entertainments", entertainmentRoute);
 app.use("/api/v1/restaurants", restaurantRoute);
