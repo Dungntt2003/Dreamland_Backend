@@ -1,7 +1,19 @@
 const db = require("../models/index");
 const getAllEnters = async () => {
-  const enters = await db.Entertainment.findAll();
-  return enters;
+  const entertainments = await db.Entertainment.findAll();
+
+  const uniqueEnters = [];
+  const seen = new Set();
+
+  for (const enter of entertainments) {
+    const key = `${enter.name}|${enter.address}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueEnters.push(enter);
+    }
+  }
+
+  return uniqueEnters;
 };
 
 const getEnterById = async (id) => {

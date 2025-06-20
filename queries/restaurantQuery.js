@@ -1,8 +1,20 @@
 const db = require("../models/index");
 
 const getRestaurants = async () => {
-  const restaurants = await db.Restaurant.findAll();
-  return restaurants;
+  const restaurants = await db.Restaurant.findAll({});
+
+  const uniqueRestaurants = [];
+  const seen = new Set();
+
+  for (const restaurant of restaurants) {
+    const key = `${restaurant.name ?? ""}|${restaurant.address ?? ""}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueRestaurants.push(restaurant);
+    }
+  }
+
+  return uniqueRestaurants;
 };
 
 const getRestaurantById = async (id) => {

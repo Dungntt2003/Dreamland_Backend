@@ -21,11 +21,9 @@ const updateAva = async (id, ava) => {
 };
 
 const updateUser = async (id, userData) => {
-  // console.log(userData);
   const [count] = await db.User.update(userData, {
     where: { id: id },
   });
-  // console.log(count);
   return count;
 };
 

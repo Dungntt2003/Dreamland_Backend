@@ -4,7 +4,19 @@ const getListHotels = async () => {
   const hotels = await db.Hotel.findAll({
     include: [{ model: db.Room, as: "room" }],
   });
-  return hotels;
+
+  const uniqueHotels = [];
+  const seen = new Set();
+
+  for (const hotel of hotels) {
+    const key = `${hotel.name ?? ""}|${hotel.address ?? ""}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueHotels.push(hotel);
+    }
+  }
+
+  return uniqueHotels;
 };
 
 const getHotel = async (id) => {
