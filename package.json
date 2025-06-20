@@ -4,7 +4,6 @@
   "description": "information about dalat - a famous place in vietnam",
   "main": "index.js",
   "scripts": {
-    "postinstall": "node scripts/fix-dependencies.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js"
   },
@@ -39,6 +38,6 @@
     "sequelize": "^6.37.4",
     "sequelize-cli": "^6.6.2",
     "uuid": "^11.1.0",
-    "vnpay": "^1.6.1"
+    "vnpay": "^2.3.0"
   }
 }
