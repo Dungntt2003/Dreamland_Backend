@@ -4,6 +4,7 @@ const {
   updateDescription,
   getRepoList,
   updateStatus,
+  deleteRepo,
 } = require("../queries/repositoryQuery");
 
 const getAll = async (req, res) => {
@@ -72,10 +73,27 @@ const updateStatusRepo = async (req, res) => {
   }
 };
 
+const removeRepo = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deletedCount = await deleteRepo(id);
+    if (deletedCount > 0) {
+      res.status(200).json({
+        message: "Repository deleted successfully",
+      });
+    } else {
+      res.status(404).json({ message: "Repository not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createNew,
   getFullDemo,
   updateRepoWithDes,
   getAll,
   updateStatusRepo,
+  removeRepo,
 };

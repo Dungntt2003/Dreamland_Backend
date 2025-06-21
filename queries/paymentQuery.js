@@ -66,9 +66,19 @@ const getPayment = async (repository_id, service_id) => {
   return paymentWithService;
 };
 
+const getPaymenyByRepoId = async (repository_id) => {
+  const payments = await db.ServicePayment.findAll({
+    where: {
+      repository_id: repository_id,
+    },
+  });
+  return payments;
+};
+
 module.exports = {
   createPayment,
   checkPaymentExists,
   updatePayment,
   getPayment,
+  getPaymenyByRepoId,
 };

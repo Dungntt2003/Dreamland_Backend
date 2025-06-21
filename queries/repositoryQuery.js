@@ -55,10 +55,18 @@ const updateStatus = async (id) => {
   }
 };
 
+const deleteRepo = async (id) => {
+  const deletedCount = await db.Repository.destroy({
+    where: { id },
+  });
+  return deletedCount;
+};
+
 module.exports = {
   createRepo,
   getDemoDetail,
   updateDescription,
   getRepoList,
   updateStatus,
+  deleteRepo,
 };
