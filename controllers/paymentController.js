@@ -1,5 +1,4 @@
-const vnpay = require("../middlewares/vnpayMiddleware");
-const { ProductCode, VnpLocale } = require("vnpay");
+const VNP_CONFIG = require("../middlewares/vnpayMiddleware");
 const {
   createPayment,
   checkPaymentExists,
@@ -7,48 +6,153 @@ const {
   getPayment,
 } = require("../queries/paymentQuery");
 const { v4: uuidv4 } = require("uuid");
+const crypto = require("crypto");
+const querystring = require("querystring");
 
-const paymentByVnPay = (req, res) => {
-  const returnUrl =
-    req.body?.returnUrl || "http://localhost:3000/api/v1/payment/vnpay-return";
+const formatDateVNPay = (date) => {
+  const tzOffset = 7 * 60 * 60 * 1000;
+  const local = new Date(date.getTime() + tzOffset);
 
-  const extraInfo = {
-    repoId: req.body.repoId,
-    serviceId: req.body.serviceId,
+  const yyyy = local.getUTCFullYear();
+  const MM = String(local.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(local.getUTCDate()).padStart(2, "0");
+  const hh = String(local.getUTCHours()).padStart(2, "0");
+  const mm = String(local.getUTCMinutes()).padStart(2, "0");
+  const ss = String(local.getUTCSeconds()).padStart(2, "0");
+
+  return `${yyyy}${MM}${dd}${hh}${mm}${ss}`;
+};
+
+const sortObject = (obj) => {
+  const sorted = {};
+  const str = [];
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      str.push(key);
+    }
+  }
+  str.sort();
+  for (let i = 0; i < str.length; i++) {
+    const key = str[i];
+    sorted[key] = String(obj[key]);
+  }
+  return sorted;
+};
+
+const createSignature = (data, secretKey) => {
+  if (!secretKey) {
+    throw new Error(
+      "VNPay Hash Secret is required. Please check your VNP_HASH_SECRET environment variable or VNP_CONFIG.vnp_HashSecret"
+    );
+  }
+  const hmac = crypto.createHmac("sha512", secretKey);
+  hmac.update(Buffer.from(data, "utf-8"));
+  return hmac.digest("hex");
+};
+
+const buildPaymentUrl = (params) => {
+  const {
+    vnp_Amount,
+    vnp_IpAddr,
+    vnp_TxnRef,
+    vnp_OrderInfo,
+    vnp_OrderType = "other",
+    vnp_ReturnUrl = VNP_CONFIG.vnp_ReturnUrl,
+    vnp_Locale = "vn",
+  } = params;
+
+  const date = new Date();
+  const createDate = formatDateVNPay(date);
+  const expireDate = formatDateVNPay(new Date(date.getTime() + 15 * 60 * 1000));
+
+  let vnp_Params = {
+    vnp_Version: "2.1.0",
+    vnp_Command: "pay",
+    vnp_TmnCode: VNP_CONFIG.vnp_TmnCode,
+    vnp_Locale: vnp_Locale,
+    vnp_CurrCode: "VND",
+    vnp_TxnRef: vnp_TxnRef,
+    vnp_OrderInfo: vnp_OrderInfo,
+    vnp_OrderType: vnp_OrderType,
+    vnp_Amount: vnp_Amount * 100,
+    vnp_ReturnUrl: vnp_ReturnUrl,
+    vnp_IpAddr: vnp_IpAddr,
+    vnp_CreateDate: createDate,
+    vnp_ExpireDate: expireDate,
   };
 
-  const paymentUrl = vnpay.buildPaymentUrl({
-    vnp_Amount: req.body.amount,
-    vnp_IpAddr:
+  vnp_Params = sortObject(vnp_Params);
+
+  const signData = querystring.stringify(vnp_Params, null, null);
+  const signed = createSignature(signData, VNP_CONFIG.vnp_HashSecret);
+  vnp_Params["vnp_SecureHash"] = signed;
+  const paymentUrl =
+    VNP_CONFIG.vnp_Url + "?" + querystring.stringify(vnp_Params, null, null);
+  return paymentUrl;
+};
+
+const paymentByVnPay = (req, res) => {
+  try {
+    if (!VNP_CONFIG.vnp_TmnCode) {
+      return res.status(500).json({
+        error: "VNPay TMN Code chưa được cấu hình",
+        message:
+          "Vui lòng cấu hình VNP_TMN_CODE trong environment variables hoặc VNP_CONFIG",
+      });
+    }
+
+    if (!VNP_CONFIG.vnp_HashSecret) {
+      return res.status(500).json({
+        error: "VNPay Hash Secret chưa được cấu hình",
+        message:
+          "Vui lòng cấu hình VNP_HASH_SECRET trong environment variables hoặc VNP_CONFIG",
+      });
+    }
+
+    if (!req.body.amount || req.body.amount <= 0) {
+      return res.status(400).json({
+        error: "Số tiền không hợp lệ",
+        message: "Vui lòng cung cấp số tiền thanh toán hợp lệ",
+      });
+    }
+
+    const returnUrl = req.body?.returnUrl || VNP_CONFIG.vnp_ReturnUrl;
+
+    const extraInfo = {
+      repoId: req.body.repoId,
+      serviceId: req.body.serviceId,
+    };
+
+    const vnp_IpAddr =
       req.headers["x-forwarded-for"] ||
       req.connection.remoteAddress ||
       req.socket.remoteAddress ||
-      req.ip,
-    vnp_TxnRef: uuidv4().replace(/-/g, "").slice(0, 13),
-    vnp_OrderInfo: Buffer.from(JSON.stringify(extraInfo)).toString("base64"),
-    vnp_OrderType: ProductCode.Other,
-    vnp_ReturnUrl: returnUrl,
-    vnp_Locale: VnpLocale.VN,
-  });
+      req.ip ||
+      "127.0.0.1";
 
-  return res.json({ paymentUrl });
-};
+    const vnp_TxnRef = uuidv4().replace(/-/g, "").slice(0, 13);
+    const vnp_OrderInfo = Buffer.from(JSON.stringify(extraInfo)).toString(
+      "base64"
+    );
 
-const paymentReturn = (req, res) => {
-  let verify = {};
-  try {
-    verify = vnpay.verifyReturnUrl(req.query);
-    if (!verify.isVerified) {
-      return res.send("Xác thực tính toàn vẹn dữ liệu không thành công");
-    }
-    if (!verify.isSuccess) {
-      return res.send("Đơn hàng thanh toán không thành công");
-    }
+    const paymentUrl = buildPaymentUrl({
+      vnp_Amount: req.body.amount,
+      vnp_IpAddr: vnp_IpAddr,
+      vnp_TxnRef: vnp_TxnRef,
+      vnp_OrderInfo: vnp_OrderInfo,
+      vnp_OrderType: "other",
+      vnp_ReturnUrl: returnUrl,
+      vnp_Locale: "vn",
+    });
+
+    return res.json({ paymentUrl });
   } catch (error) {
-    return res.send("Dữ liệu không hợp lệ");
+    console.error("VNPay payment error:", error);
+    return res.status(500).json({
+      error: "Có lỗi xảy ra khi tạo URL thanh toán",
+      message: error.message,
+    });
   }
-
-  return res.send("Xác thực URL trả về thành công");
 };
 
 const createNewPayment = async (req, res) => {
@@ -114,7 +218,6 @@ const getPaymentWithId = async (req, res) => {
 
 module.exports = {
   paymentByVnPay,
-  paymentReturn,
   createNewPayment,
   checkPaymentHaveExisted,
   editPayment,

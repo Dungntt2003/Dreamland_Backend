@@ -1,27 +1,11 @@
 require("dotenv").config();
-const { VNPay, ignoreLogger } = require("vnpay");
 
-const vnpay = new VNPay({
-  tmnCode: process.env.VNP_TMNCODE,
-  secureSecret: process.env.VNP_HASHSECRET,
-  vnpayHost: "https://sandbox.vnpayment.vn",
-  testMode: true, // tùy chọn, ghi đè vnpayHost thành sandbox nếu là true
-  hashAlgorithm: "SHA512", // tùy chọn
+const VNP_CONFIG = {
+  vnp_TmnCode: process.env.VNP_TMNCODE,
+  vnp_HashSecret: process.env.VNP_HASHSECRET,
+  vnp_Url: process.env.VNP_URL,
+  vnp_Api: process.env.VNP_API,
+  vnp_ReturnUrl: `${process.env.BASE_URL}${process.env.VNP_RETURN_PATH}`,
+};
 
-  /**
-   * Sử dụng enableLog để bật/tắt logger
-   * Nếu enableLog là false, loggerFn sẽ không được sử dụng trong bất kỳ phương thức nào
-   */
-  enableLog: true, // optional
-
-  /**
-   * Hàm `loggerFn` sẽ được gọi để ghi log
-   * Mặc định, loggerFn sẽ ghi log ra console
-   * Bạn có thể ghi đè loggerFn để ghi log ra nơi khác
-   *
-   * `ignoreLogger` là một hàm không làm gì cả
-   */
-  loggerFn: ignoreLogger, // optional
-});
-
-module.exports = vnpay;
+module.exports = VNP_CONFIG;
